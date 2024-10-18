@@ -1,5 +1,5 @@
 public class DataExporter {
-    private static DataFrame dataframe;
+    private DataFrame dataframe;
 
     public void toCSV(String path) {
         // write data to CSV file
