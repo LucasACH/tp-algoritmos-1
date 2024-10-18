@@ -1,3 +1,4 @@
+package mogul;
 
 class Cell<T> {
     public T value;

@@ -1,8 +1,9 @@
+package mogul;
 import java.util.List;
 import java.util.function.Predicate;
 
 class DataManipulator <T>{
-    private static DataFrame dataframe;
+    private DataFrame<T> dataframe;
 
 
     public void sortBy(List<String> columns, boolean descending) {

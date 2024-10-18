@@ -1,13 +1,14 @@
+package mogul;
 import java.util.List;
 
 class DataFrame<T> implements Visualizer<T>{
-    private List<Column> columns;
-    private DataExporter exporter;
-    private DataManipulator manipulator;
+    private List<Column<T>> columns;
+    private DataExporter<T> exporter;
+    private DataManipulator<T> manipulator;
     private GroupedDataFrame analyzer;
 
 
-    public void insertRow(T label, List<Cell> cells) {
+    public void insertRow(T label, List<Cell<T>> cells) {
         // insert a row into the DataFrame
     }
 
@@ -15,7 +16,7 @@ class DataFrame<T> implements Visualizer<T>{
         // count the number of rows in the DataFrame
     }
     
-    public void insertColumn(Column column) {
+    public void insertColumn(Column<T> column) {
         // insert a row into the DataFrame
     }
 
