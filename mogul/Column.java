@@ -1,5 +1,6 @@
 package mogul;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Column <T>{
@@ -9,6 +10,11 @@ public class Column <T>{
     
     public Column(List<Cell<T>> cells, T label){
         this.cells = cells;
+        this.label = label;
+    }
+
+    public Column(T label){
+        this.cells = new ArrayList<>();
         this.label = label;
     }
 
@@ -58,5 +64,19 @@ public class Column <T>{
 
     public void setLabel(T label){
         this.label = label;
+    }
+
+    public List<Cell<T>> getCells(){
+        return cells;
+    }
+
+    public void addCell(Cell<T> cell){
+        // TODO: Verificar que el tipo de la celda sea el mismo que el tipo de la columna.
+        cells.add(cell);
+    }
+
+    public Column<T> copy(){
+        Column<T> copy = new Column<>(cells, label);
+        return copy;
     }
 }

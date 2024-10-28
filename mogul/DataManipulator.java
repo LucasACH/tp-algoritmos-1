@@ -18,9 +18,24 @@ class DataManipulator <T>{
         // filter the DataFrame by the specified function
     }
 
-    public void slice(List<Integer> rows, List<Integer> columns) {
-        // slice the DataFrame
+
+    
+    public DataFrame<T> slice(DataFrame<T> df, int start, int end) {
+        DataFrame<T> slicedDF = new DataFrame<>();
+
+        // Iterar por cada columna y crear una sublista de celdas en el rango
+        for (Column<T> column : df.getColumns()) {
+            List<Cell<T>> cells = column.getCells().subList(start, end);
+            Column<T> newColumn = new Column<T>(cells, column.getLabel());
+            slicedDF.insertColumn(newColumn);
+        }
+
+        return slicedDF;
     }
+    
+        // Aquí también se podrían agregar los métodos `filter`, `fillna`, `sample`, y `groupBy`
+    }
+    
 
     public void sample(double frac){
         // sample the DataFrame
