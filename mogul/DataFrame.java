@@ -1,8 +1,10 @@
 package mogul;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-class DataFrame<T> implements Visualizer<T> {
+class DataFrame<T> implements Visualizer<DataFrame<T>> {
     private List<Column<T>> columns;
     private DataExporter<T> exporter;
     private DataManipulator<T> manipulator;
@@ -10,15 +12,22 @@ class DataFrame<T> implements Visualizer<T> {
 
     public DataFrame() {
         this.columns = new ArrayList<>();
+        this.exporter = new DataExporter<T>(this);
+        this.manipulator = new DataManipulator<>();
+        this.analyzer = new GroupedDataFrame();
     }
 
     public DataFrame<T> insertRow(T label, List<Cell<T>> cells) {
         if (cells.size() != columns.size()) {
             throw new IllegalArgumentException("The number of cells does not match the number of columns.");
         }
-
+        
         for (int i = 0; i < columns.size(); i++) {
-            columns.get(i).addCell(cells.get(i));
+            Column<T> column = columns.get(i);
+            if (!column.areCellsOfSameType()) {
+                throw new IllegalArgumentException("Cell types in the row do not match column types.");
+            }
+            column.addCell(cells.get(i));
         }
         return this;
     }
@@ -86,13 +95,36 @@ class DataFrame<T> implements Visualizer<T> {
     }
 
     @Override
-    public T head(int n) {
+    public DataFrame<T> head(int n) {
         return manipulator.slice(this, 0, Math.min(n, countRows()));
     }
 
     @Override
-    public T tail(int n) {
+    public DataFrame<T> tail(int n) {
         return manipulator.slice(this, countRows() - Math.min(n, countRows()), countRows());
     }
 
+    // Export methods
+    public void exportToCSV(String path) {
+        try {
+            exporter.toCSV(path);
+        } catch (IOException error) {
+            error.printStackTrace();
+            // Handle the exception as needed
+        }
+    }
+
+    public void exportToJSON(String path) {
+        try {
+            exporter.toJSON(path);
+        } catch (IOException error) {
+            error.printStackTrace();
+            // Handle the exception as needed
+        }
+    }
+
+    // Getter for columns
+    public List<Column<T>> getColumns() {
+        return columns;
+    } // TODO: Revisar esta implementación porque esta devolviendo el df entero
 }
