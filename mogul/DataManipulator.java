@@ -1,10 +1,10 @@
 package mogul;
+
 import java.util.List;
 import java.util.function.Predicate;
 
-class DataManipulator <T>{
+class DataManipulator<T> {
     private DataFrame<T> dataframe;
-
 
     public void sortBy(List<String> columns, boolean descending) {
         // sort the DataFrame by the specified columns
@@ -18,8 +18,6 @@ class DataManipulator <T>{
         // filter the DataFrame by the specified function
     }
 
-
-    
     public DataFrame<T> slice(DataFrame<T> df, int start, int end) {
         DataFrame<T> slicedDF = new DataFrame<>();
 
@@ -32,16 +30,12 @@ class DataManipulator <T>{
 
         return slicedDF;
     }
-    
-        // Aquí también se podrían agregar los métodos `filter`, `fillna`, `sample`, y `groupBy`
-    }
-    
 
-    public void sample(double frac){
+    public void sample(double frac) {
         // sample the DataFrame
     }
 
     public void groupBy(List<String> columns) {
         // group the DataFrame by the specified columns
-    }   
+    }
 }

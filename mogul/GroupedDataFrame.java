@@ -1,11 +1,10 @@
 package mogul;
+
 import java.util.Map;
 import java.util.List;
 
-
 class GroupedDataFrame {
     private Map<String, List<Row>> groups;
-
 
     public void sum(String column) {
         // sum the values in each group

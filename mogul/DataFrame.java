@@ -21,7 +21,7 @@ class DataFrame<T> implements Visualizer<DataFrame<T>> {
         if (cells.size() != columns.size()) {
             throw new IllegalArgumentException("The number of cells does not match the number of columns.");
         }
-        
+
         for (int i = 0; i < columns.size(); i++) {
             Column<T> column = columns.get(i);
             if (!column.areCellsOfSameType()) {

@@ -1,7 +1,7 @@
 package mogul;
 
 class Cell<T> {
-    private T value; // Cambié `public` a `private` para encapsulación
+    private T value;
 
     public Cell(T value) {
         this.value = value;
@@ -10,7 +10,7 @@ class Cell<T> {
     public boolean isEmpty() {
         return value == null;
     }
-    
+
     public T getValue() {
         return value;
     }
@@ -21,6 +21,6 @@ class Cell<T> {
 
     @Override
     public String toString() {
-        return value != null ? value.toString() : "null";
+        return isEmpty() ? "null" : value.toString();
     }
 }
