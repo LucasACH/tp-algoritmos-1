@@ -1,34 +1,54 @@
-
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-class DataFrame<T> implements Visualizer<DataFrame<T>> {
-    private List<Column<T>> columns;
-    private DataExporter<T> exporter;
-    private DataManipulator<T> manipulator;
+class DataFrame implements Visualizer<DataFrame> {
+    private List<Column<?>> columns;
+    private DataExporter exporter;
+    private DataManipulator manipulator;
     private GroupedDataFrame analyzer;
 
     public DataFrame() {
         this.columns = new ArrayList<>();
-        this.exporter = new DataExporter<T>(this);
-        this.manipulator = new DataManipulator<>();
+        this.exporter = new DataExporter(this);
+        this.manipulator = new DataManipulator();
         this.analyzer = new GroupedDataFrame();
     }
 
-    public DataFrame<T> insertRow(T label, List<Cell<T>> cells) {
+    // TODO: Revisar el casting explícito de tipo Object (preguntar tal vez)
+    public DataFrame insertRow(String label, List<Cell<?>> cells) {
         if (cells.size() != columns.size()) {
             throw new IllegalArgumentException("The number of cells does not match the number of columns.");
         }
 
         for (int i = 0; i < columns.size(); i++) {
-            Column<T> column = columns.get(i);
+            Column<?> column = columns.get(i);
+            Cell<?> cell = cells.get(i);
+        
             if (!column.areCellsOfSameType()) {
                 throw new IllegalArgumentException("Cell types in the row do not match column types.");
             }
-            column.addCell(cells.get(i));
+            ((Column<Object>) column).addCell((Cell<Object>) cell); // Casting explícito
         }
+        
+        return this;
+    }
+
+    public DataFrame insertRow(int id, List<Cell<?>> cells) {
+        if (cells.size() != columns.size()) {
+            throw new IllegalArgumentException("The number of cells does not match the number of columns.");
+        }
+
+        for (int i = 0; i < columns.size(); i++) {
+            Column<?> column = columns.get(i);
+            Cell<?> cell = cells.get(i);
+        
+            if (!column.areCellsOfSameType()) {
+                throw new IllegalArgumentException("Cell types in the row do not match column types.");
+            }
+            ((Column<Object>) column).addCell((Cell<Object>) cell); // Casting explícito 
+        }
+        
         return this;
     }
 
@@ -36,7 +56,7 @@ class DataFrame<T> implements Visualizer<DataFrame<T>> {
         return columns.isEmpty() ? 0 : columns.get(0).getCells().size();
     }
 
-    public DataFrame<T> insertColumn(Column<T> column) {
+    public DataFrame insertColumn(Column<?> column) {
         if (!columns.isEmpty() && column.getCells().size() != countRows()) {
             throw new IllegalArgumentException("Column size must match the number of rows in the DataFrame.");
         }
@@ -48,8 +68,8 @@ class DataFrame<T> implements Visualizer<DataFrame<T>> {
         return columns.size();
     }
 
-    public Column<T> getColumn(T label) {
-        for (Column<T> column : columns) {
+    public Column<?> getColumn(String label) {
+        for (Column<?> column : columns) {
             if (column.getLabel().equals(label)) {
                 return column;
             }
@@ -57,37 +77,44 @@ class DataFrame<T> implements Visualizer<DataFrame<T>> {
         throw new IllegalArgumentException("Column with label " + label + " not found.");
     }
 
-    public Cell<T> getCell(int row, int column) {
+    public Cell<?> getCell(int row, int column) {
         if (column >= countColumns() || row >= countRows()) {
             throw new IndexOutOfBoundsException("Invalid row or column index.");
         }
         return columns.get(column).getCell(row);
     }
 
-    public void setCell(int row, int column, T value) {
-        if (column >= countColumns() || row >= countRows()) {
+    public <T> void setCell(int rowIndex, int columnIndex, T value) throws ClassCastException {
+        if (columnIndex >= countColumns() || rowIndex >= countRows()) {
             throw new IndexOutOfBoundsException("Invalid row or column index.");
         }
-        columns.get(column).getCell(row).setValue(value);
+
+        Column<T> column = (Column<T>) columns.get(columnIndex);  
+
+        if (!column.getClass().isInstance(value)) {
+            throw new IllegalArgumentException("Value type does not match cell type");
+        }
+
+        column.setCell(rowIndex, value);
     }
 
-    public DataFrame<T> copy() {
-        DataFrame<T> copy = new DataFrame<>();
-        for (Column<T> column : this.columns) {
-            copy.insertColumn(column.copy());
+    public DataFrame copy() {
+        DataFrame copy = new DataFrame();
+        for (Column<?> column : this.columns) {
+            copy.insertColumn(column.copy()); // TODO: Implementar el método copy en Column (deep copy)
         }
         return copy;
     }
 
     @Override
     public void show() {
-        for (Column<T> column : columns) {
+        for (Column<?> column : columns) {
             System.out.print(column.getLabel() + "\t");
         }
         System.out.println();
         int numRows = countRows();
         for (int i = 0; i < numRows; i++) {
-            for (Column<T> column : columns) {
+            for (Column<?> column : columns) {
                 System.out.print(column.getCell(i).getValue() + "\t");
             }
             System.out.println();
@@ -95,12 +122,12 @@ class DataFrame<T> implements Visualizer<DataFrame<T>> {
     }
 
     @Override
-    public DataFrame<T> head(int n) {
+    public DataFrame head(int n) {
         return manipulator.slice(this, 0, Math.min(n, countRows()));
     }
 
     @Override
-    public DataFrame<T> tail(int n) {
+    public DataFrame tail(int n) {
         return manipulator.slice(this, countRows() - Math.min(n, countRows()), countRows());
     }
 
@@ -124,7 +151,7 @@ class DataFrame<T> implements Visualizer<DataFrame<T>> {
     }
 
     // Getter for columns
-    public List<Column<T>> getColumns() {
+    public List<Column<?>> getColumns() {
         return columns;
     } // TODO: Revisar esta implementación porque esta devolviendo el df entero
 }

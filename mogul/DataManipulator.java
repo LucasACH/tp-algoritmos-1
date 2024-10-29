@@ -3,14 +3,14 @@
 import java.util.List;
 import java.util.function.Predicate;
 
-class DataManipulator<T> {
-    private DataFrame<T> dataframe;
+class DataManipulator {
+    private DataFrame dataframe;
 
     public void sortBy(List<String> columns, boolean descending) {
         // sort the DataFrame by the specified columns
     }
 
-    public void fillna(String column, T value) {
+    public <T> void fillna(String column, T value) {
         // fill missing values in the DataFrame
     }
 
@@ -18,13 +18,13 @@ class DataManipulator<T> {
         // filter the DataFrame by the specified function
     }
 
-    public DataFrame<T> slice(DataFrame<T> df, int start, int end) {
-        DataFrame<T> slicedDF = new DataFrame<>();
+    public DataFrame slice(DataFrame df, int start, int end) {
+        DataFrame slicedDF = new DataFrame();
 
         // Iterar por cada columna y crear una sublista de celdas en el rango
-        for (Column<T> column : df.getColumns()) {
-            List<Cell<T>> cells = column.getCells().subList(start, end);
-            Column<T> newColumn = new Column<T>(cells, column.getLabel());
+        for (Column<?> column : df.getColumns()) {
+            List<Cell<?>> cells = column.getCells().subList(start, end);
+            Column<Cell<?>> newColumn = new Column<>(cells, column.getLabel()); // TODO: no se pudo solucionar el error
             slicedDF.insertColumn(newColumn);
         }
 

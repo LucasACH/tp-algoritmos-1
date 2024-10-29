@@ -2,17 +2,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
-public class DataExporter<T> {
-    private DataFrame<T> dataframe;
+public class DataExporter {
+    private DataFrame dataframe;
 
-    public DataExporter(DataFrame<T> dataframe) {
+    public DataExporter(DataFrame dataframe) {
         this.dataframe = dataframe;
     }
 
     public void toCSV(String path) throws IOException {
         try (FileWriter writer = new FileWriter(path)) {
             // Escribir los nombres de las columnas en la primera fila
-            List<Column<T>> columns = dataframe.getColumns();
+            List<Column<? extends Object>> columns = dataframe.getColumns();
             for (int i = 0; i < columns.size(); i++) {
                 writer.append(columns.get(i).getLabel().toString());
                 if (i < columns.size() - 1) {
@@ -25,7 +25,7 @@ public class DataExporter<T> {
             int numRows = dataframe.countRows();
             for (int row = 0; row < numRows; row++) {
                 for (int col = 0; col < columns.size(); col++) {
-                    T value = columns.get(col).getCell(row).getValue();
+                    Object value = columns.get(col).getCell(row).getValue(); // TODO: revisar bien esto
                     writer.append(value != null ? value.toString() : "");
                     if (col < columns.size() - 1) {
                         writer.append(",");
@@ -43,13 +43,13 @@ public class DataExporter<T> {
         try (FileWriter writer = new FileWriter(path)) {
             writer.append("[\n");
 
-            List<Column<T>> columns = dataframe.getColumns();
+            List<Column<? extends Object>> columns = dataframe.getColumns();
             int numRows = dataframe.countRows();
             for (int row = 0; row < numRows; row++) {
                 writer.append("  {\n");
                 for (int col = 0; col < columns.size(); col++) {
                     String label = columns.get(col).getLabel().toString();
-                    T value = columns.get(col).getCell(row).getValue();
+                    Object value = columns.get(col).getCell(row).getValue();
 
                     writer.append("    \"" + label + "\": ");
                     writer.append(value != null ? "\"" + value.toString() + "\"" : "null");

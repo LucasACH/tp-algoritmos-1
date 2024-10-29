@@ -4,23 +4,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataImporter<T> {
-    public DataFrame<T> readCSV(String path) throws IOException {
-        DataFrame<T> dataframe = new DataFrame<>();
+public class DataImporter {
+    public DataFrame readCSV(String path) throws IOException {
+        DataFrame dataframe = new DataFrame();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line = br.readLine();
             if (line != null) {
                 String[] headers = line.split(",");
                 for (String header : headers) {
-                    dataframe.insertColumn(new Column<>((T) header));
+                    dataframe.insertColumn(new Column<>(header));
                 }
             }
 
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
-                List<Cell<T>> cells = new ArrayList<>();
+                List<Cell<?>> cells = new ArrayList<>();
                 for (String value : values) {
-                    cells.add(new Cell<>((T) value)); // Convertir a T si es necesario
+                    cells.add(new Cell<>(value)); // Convertir a T si es necesario
                 }
                 dataframe.insertRow(null, cells); // null como placeholder del label
             }
@@ -28,8 +28,8 @@ public class DataImporter<T> {
         return dataframe;
     }
 
-    public DataFrame<T> readJSON(String path) throws IOException {
-        DataFrame<T> dataframe = new DataFrame<>();
+    public DataFrame readJSON(String path) throws IOException {
+        DataFrame dataframe = new DataFrame();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             StringBuilder json = new StringBuilder();
             String line;
@@ -45,17 +45,17 @@ public class DataImporter<T> {
             String[] firstRow = rows[0].replace("{", "").replace("}", "").split(",");
             for (String column : firstRow) {
                 String label = column.split(":")[0].replace("\"", "").trim();
-                dataframe.insertColumn(new Column<>((T) label));
+                dataframe.insertColumn(new Column<>(label));
             }
 
             // Procesar valores de cada fila
             for (String row : rows) {
                 row = row.replace("{", "").replace("}", "");
                 String[] values = row.split(",");
-                List<Cell<T>> cells = new ArrayList<>();
+                List<Cell<?>> cells = new ArrayList<>();
                 for (String value : values) {
                     String cellValue = value.split(":")[1].replace("\"", "").trim();
-                    cells.add(new Cell<>((T) cellValue)); // Convertir a T si es necesario
+                    cells.add(new Cell<>(cellValue)); // Convertir a T si es necesario
                 }
                 dataframe.insertRow(null, cells);
             }
