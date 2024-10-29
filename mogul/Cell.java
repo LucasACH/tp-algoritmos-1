@@ -1,5 +1,3 @@
-package mogul;
-
 class Cell<T> {
     private T value;
 

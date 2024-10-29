@@ -1,4 +1,3 @@
-package mogul;
 
 import java.util.Map;
 import java.util.List;

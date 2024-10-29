@@ -1,85 +1,65 @@
-package mogul;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.List;
 
-public class DataImporter {
-
-    public DataFrame<Object> fromCSV(String path) throws IOException {
-        DataFrame<Object> dataframe = new DataFrame<>();
-
+public class DataImporter<T> {
+    public DataFrame<T> readCSV(String path) throws IOException {
+        DataFrame<T> dataframe = new DataFrame<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line = br.readLine();
-            if (line == null) {
-                throw new IOException("Empty CSV file");
+            if (line != null) {
+                String[] headers = line.split(",");
+                for (String header : headers) {
+                    dataframe.insertColumn(new Column<>((T) header));
+                }
             }
 
-            // Leer los encabezados de columna
-            String[] headers = line.split(",");
-            for (String header : headers) {
-                dataframe.insertColumn(new Column<>(header.trim()));
-            }
-
-            // Leer el resto de las filas y llenar las columnas
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
-
-                if (values.length != headers.length) {
-                    System.err.println("Warning: Inconsistent row length. Skipping row: " + line);
-                    continue;
+                List<Cell<T>> cells = new ArrayList<>();
+                for (String value : values) {
+                    cells.add(new Cell<>((T) value)); // Convertir a T si es necesario
                 }
-
-                for (int i = 0; i < values.length; i++) {
-                    String value = values[i].trim();
-                    Object cellValue = value.isEmpty() ? null : value;
-                    dataframe.getColumns().get(i).addCell(new Cell<>(cellValue));
-                }
+                dataframe.insertRow(null, cells); // null como placeholder del label
             }
-        } catch (IOException e) {
-            System.err.println("Error reading CSV: " + e.getMessage());
-            throw e;
         }
-
         return dataframe;
     }
 
-    public DataFrame<Object> fromJSON(String path) throws IOException {
-        DataFrame<Object> dataframe = new DataFrame<>();
+    public DataFrame<T> readJSON(String path) throws IOException {
+        DataFrame<T> dataframe = new DataFrame<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            StringBuilder json = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                json.append(line.trim());
+            }
 
-        String content = new String(Files.readAllBytes(Paths.get(path)));
-        JSONArray jsonArray;
+            String jsonString = json.toString();
+            jsonString = jsonString.substring(1, jsonString.length() - 1); // Eliminar [ ]
+            String[] rows = jsonString.split("\\},\\{");
 
-        try {
-            jsonArray = new JSONArray(content);
-        } catch (Exception e) {
-            throw new IOException("Invalid JSON format", e);
-        }
+            // Procesar encabezados de la primera fila
+            String[] firstRow = rows[0].replace("{", "").replace("}", "").split(",");
+            for (String column : firstRow) {
+                String label = column.split(":")[0].replace("\"", "").trim();
+                dataframe.insertColumn(new Column<>((T) label));
+            }
 
-        if (jsonArray.isEmpty()) {
-            throw new IOException("Empty JSON file");
-        }
-
-        JSONObject firstObject = jsonArray.getJSONObject(0);
-        for (String key : firstObject.keySet()) {
-            dataframe.insertColumn(new Column<>(key));
-        }
-
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject jsonObject = jsonArray.getJSONObject(i);
-            int colIndex = 0;
-            for (String key : firstObject.keySet()) { // Usamos las claves de firstObject para asegurar consistencia
-                Object cellValue = jsonObject.opt(key);
-                dataframe.getColumns().get(colIndex).addCell(new Cell<>(cellValue));
-                colIndex++;
+            // Procesar valores de cada fila
+            for (String row : rows) {
+                row = row.replace("{", "").replace("}", "");
+                String[] values = row.split(",");
+                List<Cell<T>> cells = new ArrayList<>();
+                for (String value : values) {
+                    String cellValue = value.split(":")[1].replace("\"", "").trim();
+                    cells.add(new Cell<>((T) cellValue)); // Convertir a T si es necesario
+                }
+                dataframe.insertRow(null, cells);
             }
         }
-
         return dataframe;
     }
 }

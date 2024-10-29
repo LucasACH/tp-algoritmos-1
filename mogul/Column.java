@@ -1,5 +1,3 @@
-package mogul;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +53,7 @@ public class Column<T> {
         // throw new IllegalArgumentException("Value type does not match cell type");
         // }
 
-        cells.get(index).value = value;
+        cells.get(index).setValue(value);
     }
 
     public T getLabel() {

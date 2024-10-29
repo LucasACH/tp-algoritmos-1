@@ -1,4 +1,4 @@
-package mogul;
+
 
 public interface Visualizer<T> {
     public void show();
