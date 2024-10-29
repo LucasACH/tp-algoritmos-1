@@ -76,10 +76,12 @@ public class DataExporter<T> {
     }
 }
 
-
-/*  TODO: Este código considera que:
-
-+ dataframe.getColumns() devuelve una lista de columnas como lo ajustamos previamente.
-+ En los valores nulos o vacíos de las celdas, el método toString() devuelve una representación correcta sin errores.
-
-*/
+/*
+ * TODO: Este código considera que:
+ * 
+ * + dataframe.getColumns() devuelve una lista de columnas como lo ajustamos
+ * previamente.
+ * + En los valores nulos o vacíos de las celdas, el método toString() devuelve
+ * una representación correcta sin errores.
+ * 
+ */
