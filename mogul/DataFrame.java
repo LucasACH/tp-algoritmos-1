@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import exceptions.IndexOutOfBounds;
+import exceptions.TypeDoesNotMatch;
 
 class DataFrame implements Visualizer<DataFrame> {
     private List<Column<?>> columns;
@@ -11,8 +13,14 @@ class DataFrame implements Visualizer<DataFrame> {
     public DataFrame() {
         this.columns = new ArrayList<>();
         this.exporter = new DataExporter(this);
-        this.manipulator = new DataManipulator();
-        this.analyzer = new GroupedDataFrame();
+        this.manipulator = new DataManipulator(this);
+        this.analyzer = new GroupedDataFrame(this);
+    }
+    public DataFrame(List<Column<?>> columns) {
+        this.columns = columns;
+        this.exporter = new DataExporter(this);
+        this.manipulator = new DataManipulator(this);
+        this.analyzer = new GroupedDataFrame(this);
     }
 
     // TODO: Revisar el casting explícito de tipo Object (preguntar tal vez)
@@ -20,17 +28,17 @@ class DataFrame implements Visualizer<DataFrame> {
         if (cells.size() != columns.size()) {
             throw new IllegalArgumentException("The number of cells does not match the number of columns.");
         }
-
+    
         for (int i = 0; i < columns.size(); i++) {
             Column<?> column = columns.get(i);
-            Cell<?> cell = cells.get(i);
-        
             if (!column.areCellsOfSameType()) {
                 throw new IllegalArgumentException("Cell types in the row do not match column types.");
             }
+            Cell<?> cell = cells.get(i);
             ((Column<Object>) column).addCell((Cell<Object>) cell); // Casting explícito
+            
         }
-        
+    
         return this;
     }
 
@@ -101,34 +109,52 @@ class DataFrame implements Visualizer<DataFrame> {
     public DataFrame copy() {
         DataFrame copy = new DataFrame();
         for (Column<?> column : this.columns) {
-            copy.insertColumn(column.copy()); // TODO: Implementar el método copy en Column (deep copy)
+            copy.insertColumn(column.copy());
         }
         return copy;
     }
 
-    @Override
-    public void show() {
+    public DataFrame slice(int start, int end) {
+        return new DataFrame(columns.subList(start, end));
+    }
+
+    public void deleteRow(int index) {
+        if (index < 0 || index >= countRows()) {
+            throw new IndexOutOfBoundsException("Index out of bounds");
+        }
         for (Column<?> column : columns) {
-            System.out.print(column.getLabel() + "\t");
+            column.deleteCell(index);
         }
-        System.out.println();
-        int numRows = countRows();
-        for (int i = 0; i < numRows; i++) {
-            for (Column<?> column : columns) {
-                System.out.print(column.getCell(i).getValue() + "\t");
+    }
+
+    public void show() {
+        System.out.println(this);
+    }
+
+    public DataFrame head(int n) throws IndexOutOfBounds {
+        List<Column<?>> newColumns = new ArrayList<>();
+        for (Column<?> column : this.getColumns()) {
+            try {
+                Column<?> newColumn = new Column<>(column.getCells().subList(0, n), column.getLabel());
+                newColumns.add(newColumn);
+            } catch (IndexOutOfBoundsException e) {
+                throw new IndexOutOfBounds();
             }
-            System.out.println();
         }
+        return new DataFrame(newColumns);
     }
 
-    @Override
-    public DataFrame head(int n) {
-        return manipulator.slice(this, 0, Math.min(n, countRows()));
-    }
-
-    @Override
-    public DataFrame tail(int n) {
-        return manipulator.slice(this, countRows() - Math.min(n, countRows()), countRows());
+    public DataFrame tail(int n) throws IndexOutOfBounds {
+        List<Column<?>> newColumns = new ArrayList<>();
+        for (Column<?> column : this.getColumns()) {
+            try {
+                Column<?> newColumn = new Column<>(column.getCells().subList(column.getSize() - n, column.getSize()), column.getLabel());
+                newColumns.add(newColumn);
+            } catch (IndexOutOfBoundsException e) {
+                throw new IndexOutOfBounds();
+            }
+        }
+        return new DataFrame(newColumns);
     }
 
     // Export methods
@@ -150,8 +176,58 @@ class DataFrame implements Visualizer<DataFrame> {
         }
     }
 
-    // Getter for columns
-    public List<Column<?>> getColumns() {
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        List<String> columnLabels = getColumnsLables();
+        List<Integer> columnWidths = new ArrayList<>();
+
+        // Calculate the width of each column
+        for (String columnLabel : columnLabels) {
+            int maxWidth = columnLabel.length();
+            for (int i = 0; i < columns.get(0).getSize(); i++) {
+                int cellWidth = columns.get(columnLabels.indexOf(columnLabel)).getCell(i).getValue().toString()
+                        .length();
+                if (cellWidth > maxWidth) {
+                    maxWidth = cellWidth;
+                }
+            }
+            columnWidths.add(maxWidth);
+        }
+
+        // Append column headers
+        sb.append("| ");
+        for (int i = 0; i < columnLabels.size(); i++) {
+            String columnLabel = columnLabels.get(i);
+            sb.append(String.format("%-" + columnWidths.get(i) + "s", columnLabel));
+            sb.append(" | ");
+        }
+        sb.append("\n");
+
+        // Append rows
+        for (int i = 0; i < columns.get(0).getSize(); i++) {
+            sb.append("| ");
+            for (int j = 0; j < columns.size(); j++) {
+                Column<?> column = columns.get(j);
+                String cellValue = column.getCell(i).getValue().toString();
+                sb.append(String.format("%-" + columnWidths.get(j) + "s", cellValue));
+                sb.append(" | ");
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    public List<Column<?>> getColumns(){
         return columns;
-    } // TODO: Revisar esta implementación porque esta devolviendo el df entero
+    }
+
+    // Getter for columns
+    public List<String> getColumnsLables() {
+        List<String> labels = new ArrayList<>();
+        for (Column<?> column : columns) {
+            labels.add(column.getLabel());
+        }
+        return labels;
+    }
 }

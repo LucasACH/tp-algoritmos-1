@@ -13,8 +13,16 @@ class Cell<T> {
         return value;
     }
 
+    public Class<?> getType() {
+        return value.getClass();
+    }
+
     public void setValue(T value) {
         this.value = value;
+    }
+
+    public Cell<T> copy() {
+        return new Cell<>(value);
     }
 
     @Override

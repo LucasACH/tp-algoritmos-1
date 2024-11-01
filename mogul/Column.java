@@ -30,7 +30,6 @@ public class Column<T> {
     public boolean areCellsOfSameType() {
 
         // TODO: Lanzar excepción si los tipos de datos de las celdas son distintos.
-
         if (cells.isEmpty()) {
             return true; // No hay elementos, no se puede verificar.
         }
@@ -71,6 +70,13 @@ public class Column<T> {
         cell.setValue(value);
     }
 
+    public void deleteCell(int index) {
+        if (index < 0 || index >= cells.size()) {
+            throw new IndexOutOfBoundsException("Index out of bounds");
+        }
+        cells.remove(index);
+    }
+
     public String getLabel() {
         return label;
     }
@@ -90,7 +96,18 @@ public class Column<T> {
     }
 
     public Column<T> copy() {
-        Column<T> copy = new Column<T>(cells, label);
-        return copy;
+        List<Cell<T>> copiedCells = new ArrayList<>();
+        for (Cell<T> cell : cells) {
+            copiedCells.add(cell.copy());
+        }
+        return new Column<T>(copiedCells, label);
+    }
+
+    public Class<?> getType() {
+        return this.cells.get(0).getClass();
+    }
+
+    public int getSize() {
+        return cells.size();
     }
 }

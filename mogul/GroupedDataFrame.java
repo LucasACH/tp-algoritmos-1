@@ -4,9 +4,41 @@ import java.util.List;
 
 class GroupedDataFrame {
     private Map<String, List<Row>> groups;
+    private DataFrame dataframe;
 
-    public void sum(String column) {
-        // sum the values in each group
+    public GroupedDataFrame(DataFrame dataframe) {
+        this.dataframe = dataframe;
+
+    }
+
+    public float sum(String column) { // TODO: Cambiar logica para que use las celdas de la columna
+        for (Column<?> col : dataframe.getColumns()) {
+            if (col.getLabel().equals(column)) {
+                if (col.areCellsOfSameType()) {
+                    if (col.getCell(0).getValue() instanceof Integer) {
+                        int sum = 0;
+                        for (Row row : dataframe.getRows()) {
+                            sum += (int) row.getCell(col.getId()).getValue();
+                        }
+                        return sum;
+                    } else if (col.getCell(0).getValue() instanceof Float) {
+                        float sum = 0;
+                        for (Row row : dataframe.getRows()) {
+                            sum += (float) row.getCell(col.getId()).getValue();
+                        }
+                        return sum;
+                    } else if (col.getCell(0).getValue() instanceof Double) {
+                        double sum = 0;
+                        for (Row row : dataframe.getRows()) {
+                            sum += (double) row.getCell(col.getId()).getValue();
+                        }
+                        return (float) sum;
+                    } else if (col.getCell(0).getValue() instanceof String) {
+                        throw new IllegalArgumentException("Cannot sum strings.");
+                    }
+                }
+            }
+        }
     }
 
     public void mean(String column) {
