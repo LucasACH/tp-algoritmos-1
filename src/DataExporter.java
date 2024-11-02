@@ -2,6 +2,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+import exceptions.IndexOutOfBounds;
+
 public class DataExporter {
     private DataFrame dataframe;
 
@@ -9,7 +11,7 @@ public class DataExporter {
         this.dataframe = dataframe;
     }
 
-    public void toCSV(String path) throws IOException {
+    public void toCSV(String path) throws IOException, IndexOutOfBounds {
         try (FileWriter writer = new FileWriter(path)) {
             // Escribir los nombres de las columnas en la primera fila
             List<Column<? extends Object>> columns = dataframe.getColumns();
@@ -39,7 +41,7 @@ public class DataExporter {
         }
     }
 
-    public void toJSON(String path) throws IOException {
+    public void toJSON(String path) throws IOException, IndexOutOfBounds {
         try (FileWriter writer = new FileWriter(path)) {
             writer.append("[\n");
 

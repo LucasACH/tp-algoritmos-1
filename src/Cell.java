@@ -27,6 +27,6 @@ class Cell<T> {
 
     @Override
     public String toString() {
-        return isEmpty() ? "null" : value.toString();
+        return isEmpty() ? "" : value.toString();
     }
 }

@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Alice",
+    "age": 25,
+    "city": "New York",
+    "occupation": "Engineer",
+    "salary": 70000
+  },
+  {
+    "name": "Bob",
+    "age": 30,
+    "city": "Los Angeles",
+    "occupation": "Doctor",
+    "salary": 120000
+  },
+  {
+    "name": "Charlie",
+    "age": 35,
+    "city": "Chicago",
+    "occupation": "Artist",
+    "salary": 50000
+  },
+  {
+    "name": "David",
+    "age": 40,
+    "city": "Houston",
+    "occupation": "Lawyer",
+    "salary": 90000
+  },
+  {
+    "name": "Eve",
+    "age": 28,
+    "city": "Phoenix",
+    "occupation": "Nurse",
+    "salary": 75000
+  }
+]
