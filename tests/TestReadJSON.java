@@ -1,4 +1,4 @@
-import java.util.List;
+import java.util.Arrays;
 
 public class TestReadJSON {
     public static void main(String[] args) throws Exception {
@@ -15,7 +15,7 @@ public class TestReadJSON {
 
         assert df.copy() != df;
 
-        df.insertRow(List.of(
+        df.insertRow(Arrays.asList(
                 new Cell<>("John"),
                 new Cell<>(25), new Cell<>("New York"),
                 new Cell<>("Developer"),

@@ -234,7 +234,10 @@ class DataFrame implements Visualizer<DataFrame> {
         // Horizontal line
         sb.append("|");
         for (int width : columnWidths) {
-            sb.append("-".repeat(width + 2)).append("|");
+            for (int i = 0; i < width + 2; i++) {
+                sb.append("-");
+            }
+            sb.append("|");
         }
         sb.append("\n");
     }
