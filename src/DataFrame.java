@@ -11,13 +11,14 @@ import exceptions.TypeDoesNotMatch;
 class DataFrame implements Visualizer<DataFrame> {
     private List<Column<?>> columns;
     private List<Row> rows;
-
-    private final DataExporter exporter;
-
-    public DataFrame() {
-        this.columns = new ArrayList<>();
-        this.rows = new ArrayList<>();
-        this.exporter = new DataExporter(this);
+    public final DataManipulator manipulator;
+    public final DataExporter exporter;
+        
+        public DataFrame() {
+            this.columns = new ArrayList<>();
+            this.rows = new ArrayList<>();
+            this.exporter = new DataExporter(this);
+            this.manipulator = new DataManipulator(this);
     }
 
     public DataFrame(List<Column<?>> columns) {
@@ -36,8 +37,11 @@ class DataFrame implements Visualizer<DataFrame> {
             rows.add(new Row(i, cells));
         }
 
+        this.manipulator = new DataManipulator(this);
         this.exporter = new DataExporter(this);
     }
+
+    // TODO: Imlementar constructor para crear DataFrame a partir de un arreglo de arreglos y estructura secuencial
 
     public DataFrame insertRow(List<Cell<?>> cells) throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
         insertCells(countRows(), cells);
@@ -79,6 +83,12 @@ class DataFrame implements Visualizer<DataFrame> {
         return this;
     }
 
+    public DataFrame insertColumn(String label) throws InvalidShape {
+        Column<?> column = new Column<>(label);
+        columns.add(column);
+        return this;
+    }
+
     public int countRows() {
         return columns.isEmpty() ? 0 : columns.get(0).getCells().size();
     }
@@ -112,11 +122,12 @@ class DataFrame implements Visualizer<DataFrame> {
         ((Column<T>) columns.get(columnIndex)).setCell(rowIndex, value);
     }
 
-    public DataFrame copy() throws InvalidShape {
-        DataFrame copy = new DataFrame();
-        for (Column<?> column : this.columns) {
-            copy.insertColumn(column.copy());
+    public DataFrame copy() throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse ,IndexOutOfBounds{
+        List<Column<?>> copiedColumns = new ArrayList<>();
+        for (int i = 0; i < countColumns(); i++) {
+            copiedColumns.add(columns.get(i).copy());
         }
+        DataFrame copy = new DataFrame(copiedColumns);
         return copy;
     }
 

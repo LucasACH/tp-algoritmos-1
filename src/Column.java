@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import exceptions.IndexOutOfBounds;
@@ -83,7 +85,23 @@ public class Column<T> {
     }
 
     public int getSize() {
-        return cells.size();
+        return this.cells.size();
+    }
+
+    public void sort(boolean descending) {
+        Comparator<Cell<T>> comparator = new Comparator<Cell<T>>() {
+            @Override
+            public int compare(Cell<T> cell1, Cell<T> cell2) {
+                // Comparamos las celdas usando el compareTo de Cell
+                int comparisonResult = cell1.compareTo(cell2);
+
+                // Si descending es true, invertimos el resultado de la comparación
+                return descending ? -comparisonResult : comparisonResult;
+            }
+        };
+
+        // Ordenamos la lista de celdas usando el comparator
+        Collections.sort(this.cells, comparator);
     }
 
     @Override
