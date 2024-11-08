@@ -42,13 +42,13 @@ class Row {
         return sb.toString();
     }
 
-    public Column<Object> getColumn(int columnIndex) throws IndexOutOfBounds {
-    if (columnIndex < 0 || columnIndex >= cells.size()) {
+    public Column<Object> getColumn(String label2) throws IndexOutOfBounds {
+    if (label2 < 0 || label2 >= cells.size()) {
         throw new IndexOutOfBoundsException("El índice de columna está fuera de los límites.");
     }
 
     List<Cell<Object>> columnCells = new ArrayList<>();
-    Cell<?> cell = cells.get(columnIndex);
+    Cell<?> cell = cells.get(label2);
     
     columnCells.add((Cell<Object>) cell); // Cast a Cell<Object> para agregar a columnCells
 
