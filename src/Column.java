@@ -115,4 +115,13 @@ public class Column<T> {
         }
         return sb.toString();
     }
+
+    public List<T> getValue() {
+        List<T> values = new ArrayList<>();
+        for (Cell<T> cell : cells) {
+            values.add(cell.getValue());
+        }
+        return values;
+    }
+    
 }
