@@ -99,10 +99,10 @@ class DataManipulator {
     }
 
 
-    public <T> void fillna(String column, T value) throws LabelNotFound, TypeDoesNotMatch {
+    public <T> void fillna(String column, T value) throws LabelNotFound, TypeDoesNotMatch, IndexOutOfBounds {
         for (String columnLabel : this.dataframe.getColumnLabels()) {
-            if (columnLabel.equals(column)) {
-                if(value.getClass() == this.dataframe.getColumn(column).getType()){
+            try{
+                if (columnLabel.equals(column)) {                    
                     @SuppressWarnings("unchecked")
                     Column<T> columnToFill = (Column<T>) this.dataframe.getColumn(column);
                     for (Cell<T> cell : columnToFill.getCells()) {
@@ -110,13 +110,10 @@ class DataManipulator {
                             cell.setValue(value);
                         }
                     }
-                    break;
-                } else{
-                    throw new TypeDoesNotMatch();
+                    break;                   
                 }
-                
-            } else {
-                throw new LabelNotFound("The column " + column + " was not found in the DataFrame.");
+            } catch (Exception e) {
+                throw e;
             }
         }
     }
@@ -178,7 +175,7 @@ class DataManipulator {
                 }
                 df.insertRow(sampledRow.getLabel(), cells); // Insertar la fila en el nuevo DataFrame
             }
-        } // TODO: Revisar que devuelve los labels de las filas del dataframe original
+        }
         return df; // Retornar el nuevo DataFrame con la muestra
     }
 

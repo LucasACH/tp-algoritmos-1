@@ -1,3 +1,5 @@
+import exceptions.TypeDoesNotMatch;
+
 class Cell<T> implements Comparable<Cell<T>> {
     private T value;
 
@@ -6,6 +8,9 @@ class Cell<T> implements Comparable<Cell<T>> {
     }
 
     public boolean isEmpty() {
+        if (value instanceof String) {
+            return value.equals("");
+        }
         return value == null;
     }
 
@@ -17,7 +22,10 @@ class Cell<T> implements Comparable<Cell<T>> {
         return value.getClass();
     }
 
-    public void setValue(T value) {
+    public void setValue(T value) throws TypeDoesNotMatch {
+        if (value.getClass() != this.value.getClass()) {
+            throw new TypeDoesNotMatch();
+        }
         this.value = value;
     }
 

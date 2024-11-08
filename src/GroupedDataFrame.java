@@ -1,3 +1,4 @@
+import exceptions.IndexOutOfBounds;
 import exceptions.LabelNotFound;
 import java.util.HashMap;
 import java.util.List;
@@ -11,24 +12,25 @@ class GroupedDataFrame {
         this.df = df;
         this.groupedData = new HashMap<String, List<Row>>(); 
     }
+
     public GroupedDataFrame(DataFrame df, Map<String, List<Row>> groupedData) {
         this.df = df;
         this.groupedData = groupedData;
     }
 
-    public Map<String, Double> sum(String label) throws LabelNotFound {
+    public Map<String, Double> sum(String label) throws LabelNotFound, IndexOutOfBounds {
         Map<String, Double> results = new HashMap<>();
-        Map<String, List<Row>> groupedData = df.getGroupByData(label); // TODO: Cambiar a que busque los grupos en GroupedDataFrame
-
-        for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
+        int columnIndex = df.getColumnLabels().indexOf(label);
+       
+        for (Map.Entry<String, List<Row>> entry : this.groupedData.entrySet()) {
             String groupKey = entry.getKey();
             List<Row> rows = entry.getValue();
             double sum = 0;
 
             for (Row row : rows) {
-                Column<?> column = row.getColumn(label);
-                if (column != null && column.getValue() != null) {
-                    sum += ((Number) column.getValue()).doubleValue();
+                Cell<?> cell = row.getCell(columnIndex);
+                if (cell != null && cell.getValue() != null) {
+                    sum += ((Number) cell.getValue()).doubleValue();
                 }
             }
             results.put(groupKey, sum);
@@ -36,9 +38,9 @@ class GroupedDataFrame {
         return results;
     }
 
-    public Map<String, Double> mean(String label) throws LabelNotFound {
+    public Map<String, Double> mean(String label) throws LabelNotFound, IndexOutOfBounds {
         Map<String, Double> results = new HashMap<>();
-        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+        int columnIndex = df.getColumnLabels().indexOf(label);
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
             String groupKey = entry.getKey();
@@ -47,9 +49,9 @@ class GroupedDataFrame {
             int count = 0;
 
             for (Row row : rows) {
-                Column<?> column = row.getColumn(label);
-                if (column != null && column.getValue() != null) {
-                    sum += ((Number) column.getValue()).doubleValue();
+                Cell<?> cell = row.getCell(columnIndex);
+                if (cell != null && cell.getValue() != null) {
+                    sum += ((Number) cell.getValue()).doubleValue();
                     count++;
                 }
             }
@@ -58,9 +60,9 @@ class GroupedDataFrame {
         return results;
     }
 
-    public Map<String, Double> min(String label) throws LabelNotFound {
+    public Map<String, Double> min(String label) throws LabelNotFound, IndexOutOfBounds {
         Map<String, Double> results = new HashMap<>();
-        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+        int columnIndex = df.getColumnLabels().indexOf(label);
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
             String groupKey = entry.getKey();
@@ -68,9 +70,9 @@ class GroupedDataFrame {
             double min = Double.MAX_VALUE;
 
             for (Row row : rows) {
-                Column<?> column = row.getColumn(label);
-                if (column != null && column.getValue() != null) {
-                    min = Math.min(min, ((Number) column.getValue()).doubleValue());
+                Cell<?> cell = row.getCell(columnIndex);
+                if (cell != null && cell.getValue() != null) {
+                    min = Math.min(min, ((Number) cell.getValue()).doubleValue());
                 }
             }
             results.put(groupKey, min);
@@ -78,9 +80,9 @@ class GroupedDataFrame {
         return results;
     }
 
-    public Map<String, Double> max(String label) throws LabelNotFound {
+    public Map<String, Double> max(String label) throws LabelNotFound, IndexOutOfBounds {
         Map<String, Double> results = new HashMap<>();
-        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+        int columnIndex = df.getColumnLabels().indexOf(label);
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
             String groupKey = entry.getKey();
@@ -88,9 +90,9 @@ class GroupedDataFrame {
             double max = Double.MIN_VALUE;
 
             for (Row row : rows) {
-                Column<?> column = row.getColumn(label);
-                if (column != null && column.getValue() != null) {
-                    max = Math.max(max, ((Number) column.getValue()).doubleValue());
+                Cell<?> cell = row.getCell(columnIndex);
+                if (cell != null && cell.getValue() != null) {
+                    max = Math.max(max, ((Number) cell.getValue()).doubleValue());
                 }
             }
             results.put(groupKey, max);
@@ -98,9 +100,9 @@ class GroupedDataFrame {
         return results;
     }
 
-    public Map<String, Integer> count(String label) throws LabelNotFound {
+    public Map<String, Integer> count(String label) throws LabelNotFound, IndexOutOfBounds {
         Map<String, Integer> results = new HashMap<>();
-        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+        int columnIndex = df.getColumnLabels().indexOf(label);
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
             String groupKey = entry.getKey();
@@ -108,8 +110,8 @@ class GroupedDataFrame {
             int count = 0;
 
             for (Row row : rows) {
-                Column<?> column = row.getColumn(label);
-                if (column != null && column.getValue() != null) {
+                Cell<?> cell = row.getCell(columnIndex);
+                if (cell != null && cell.getValue() != null) {
                     count++;
                 }
             }
@@ -118,9 +120,9 @@ class GroupedDataFrame {
         return results;
     }
 
-    public Map<String, Double> std(String label) throws LabelNotFound {
+    public Map<String, Double> std(String label) throws LabelNotFound, IndexOutOfBounds {
         Map<String, Double> results = new HashMap<>();
-        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+        int columnIndex = df.getColumnLabels().indexOf(label);
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
             String groupKey = entry.getKey();
@@ -130,9 +132,9 @@ class GroupedDataFrame {
             int count = 0;
 
             for (Row row : rows) {
-                Column<?> column = row.getColumn(label);
-                if (column != null && column.getValue() != null) {
-                    double value = ((Number) column.getValue()).doubleValue();
+                Cell<?> cell = row.getCell(columnIndex);
+                if (cell != null && cell.getValue() != null) {
+                    double value = ((Number) cell.getValue()).doubleValue();
                     sum += value;
                     sumSquared += value * value;
                     count++;
@@ -146,9 +148,9 @@ class GroupedDataFrame {
         return results;
     }
 
-    public Map<String, Double> var(String label) throws LabelNotFound {
+    public Map<String, Double> var(String label) throws LabelNotFound, IndexOutOfBounds {
         Map<String, Double> results = new HashMap<>();
-        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+        int columnIndex = df.getColumnLabels().indexOf(label);
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
             String groupKey = entry.getKey();
@@ -158,9 +160,9 @@ class GroupedDataFrame {
             int count = 0;
 
             for (Row row : rows) {
-                Column<?> column = row.getColumn(label);
-                if (column != null && column.getValue() != null) {
-                    double value = ((Number) column.getValue()).doubleValue();
+                Cell<?> cell = row.getCell(columnIndex);
+                if (cell != null && cell.getValue() != null) {
+                    double value = ((Number) cell.getValue()).doubleValue();
                     sum += value;
                     sumSquared += value * value;
                     count++;

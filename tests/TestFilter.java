@@ -1,10 +1,6 @@
-import java.io.IOException;
-import exceptions.InvalidShape;
-import exceptions.LabelAlreadyInUse;
-import exceptions.TypeDoesNotMatch;
 
 public class TestFilter {
-    public static void main(String[] args) throws IOException, InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
+    public static void main(String[] args) throws Exception {
         // Crear un DataFrame
         DataFrame df = DataImporter.readCSV("data/dummy.csv");
 
@@ -16,6 +12,7 @@ public class TestFilter {
         System.out.println(dfFiltered);
 
         // Llenar los valores faltantes en una columna
-        // df.fillna("Salary", 1);
+        df.fillna("City", "");
+        df.show();
     }
 }

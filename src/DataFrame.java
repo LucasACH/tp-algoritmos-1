@@ -17,12 +17,12 @@ class DataFrame implements Visualizer<DataFrame> {
     public final DataExporter exporter;
     public final GroupedDataFrame groupedDataFrame;
         
-        public DataFrame() {
-            this.columns = new ArrayList<>();
-            this.rows = new ArrayList<>();
-            this.exporter = new DataExporter(this);
-            this.manipulator = new DataManipulator(this);
-            this.groupedDataFrame = new GroupedDataFrame(this);
+    public DataFrame() {
+        this.columns = new ArrayList<>();
+        this.rows = new ArrayList<>();
+        this.exporter = new DataExporter(this);
+        this.manipulator = new DataManipulator(this);
+        this.groupedDataFrame = new GroupedDataFrame(this);
     }
 
     public DataFrame(List<Column<?>> columns) {
@@ -47,6 +47,10 @@ class DataFrame implements Visualizer<DataFrame> {
     }
 
     // TODO: Imlementar constructor para crear DataFrame a partir de un arreglo de arreglos y estructura secuencial
+
+    private enum ExportFormat {
+        CSV, JSON
+    }
 
     public DataFrame insertRow(List<Cell<?>> cells) throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
         insertCells(countRows(), cells);
@@ -308,16 +312,12 @@ class DataFrame implements Visualizer<DataFrame> {
         }
     }
 
-    public void fillna(String column, Object value){
+    public void fillna(String column, Object value) throws TypeDoesNotMatch, IndexOutOfBounds {
         try {
             manipulator.fillna(column, value);
         } catch (LabelNotFound e) {
             e.printStackTrace();
         }
-    }
-
-    private enum ExportFormat {
-        CSV, JSON
     }
 
     public Map<String, List<Row>> getGroupByData(String label) {
