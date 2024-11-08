@@ -12,7 +12,7 @@ class GroupedDataFrame {
 
     public Map<String, Double> sum(String label) throws LabelNotFound {
         Map<String, Double> results = new HashMap<>();
-        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+        Map<String, List<Row>> groupedData = df.getGroupByData(label); // TODO: Cambiar a que busque los grupos en GroupedDataFrame
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
             String groupKey = entry.getKey();
