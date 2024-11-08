@@ -5,9 +5,15 @@ import java.util.Map;
 
 class GroupedDataFrame {
     private final DataFrame df;
+    private final Map<String, List<Row>> groupedData;
 
     public GroupedDataFrame(DataFrame df) {
         this.df = df;
+        this.groupedData = new HashMap<String, List<Row>>(); 
+    }
+    public GroupedDataFrame(DataFrame df, Map<String, List<Row>> groupedData) {
+        this.df = df;
+        this.groupedData = groupedData;
     }
 
     public Map<String, Double> sum(String label) throws LabelNotFound {

@@ -99,16 +99,24 @@ class DataManipulator {
     }
 
 
-    public <T> void fillna(String column, T value) throws LabelNotFound {
+    public <T> void fillna(String column, T value) throws LabelNotFound, TypeDoesNotMatch {
         for (String columnLabel : this.dataframe.getColumnLabels()) {
             if (columnLabel.equals(column)) {
-                @SuppressWarnings("unchecked")
-                Column<T> columnToFill = (Column<T>) this.dataframe.getColumn(column);
-                for (Cell<T> cell : columnToFill.getCells()) {
-                    if (cell.isEmpty()) {
-                        cell.setValue(value);
+                if(value.getClass() == this.dataframe.getColumn(column).getType()){
+                    @SuppressWarnings("unchecked")
+                    Column<T> columnToFill = (Column<T>) this.dataframe.getColumn(column);
+                    for (Cell<T> cell : columnToFill.getCells()) {
+                        if (cell.isEmpty()) {
+                            cell.setValue(value);
+                        }
                     }
+                    break;
+                } else{
+                    throw new TypeDoesNotMatch();
                 }
+                
+            } else {
+                throw new LabelNotFound("The column " + column + " was not found in the DataFrame.");
             }
         }
     }

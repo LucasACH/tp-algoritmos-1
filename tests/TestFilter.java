@@ -1,9 +1,6 @@
 import java.io.IOException;
-import java.time.LocalDate;
-
 import exceptions.InvalidShape;
 import exceptions.LabelAlreadyInUse;
-import exceptions.LabelNotFound;
 import exceptions.TypeDoesNotMatch;
 
 public class TestFilter {
