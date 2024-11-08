@@ -8,7 +8,7 @@ class GroupedDataFrame {
         this.df = df;
     }
 
-    public void sum(String label) throws LabelNotFound {
+    public double sum(String label) throws LabelNotFound {
         List<String> columnLabels = df.getColumnLabels();
         for (String columnName : columnLabels) {
             Column<?> column = df.getColumn(columnName);
@@ -20,15 +20,14 @@ class GroupedDataFrame {
                             sum += (double) cell.getValue();
                         }
                     }
-                    System.out.println("Sum of " + columnName + " is " + sum);
-            } else {
-                throw new IllegalArgumentException("THe column must contain only numeric values (Integer, Double or Float).");
+                    return sum;
             }
         }
+        throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
     }
 
-    public void mean(String label) throws LabelNotFound {
-       List<String> columnLabels = df.getColumnLabels();
+    public double mean(String label) throws LabelNotFound {
+        List<String> columnLabels = df.getColumnLabels();
         for (String columnName : columnLabels) {
             Column<?> column = df.getColumn(columnName);
             if (column.getLabel().equals(label) && 
@@ -41,18 +40,17 @@ class GroupedDataFrame {
                             count++;
                         }
                     }
-                    System.out.println("Mean of " + columnName + " is " + sum / count);
-            } else {
-                throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
+                    return sum / count;
             }
         }
+        throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
     }
 
-    public void min(String label) throws LabelNotFound {
+    public double min(String label) throws LabelNotFound {
         List<String> columnLabels = df.getColumnLabels();
         for (String columnName : columnLabels) {
             Column<?> column = df.getColumn(columnName);
-            if (column.getLabel().equals(column) && 
+            if (column.getLabel().equals(label) && 
                 (column.getType() == Integer.class || column.getType() == Double.class || column.getType() == Float.class)) {
                     double min = Double.MAX_VALUE;
                     for (Cell<?> cell : column.getCells()) {
@@ -60,20 +58,17 @@ class GroupedDataFrame {
                             min = Math.min(min, (double) cell.getValue());
                         }
                     }
-                    System.out.println("Min of " + columnName + " is " + min);
-            } else {
-                throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
+                    return min;
             }
-
         }
+        throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
     }
 
-    public void max(String label) throws LabelNotFound {
-        List <String> columnLabels = df.getColumnLabels();
+    public double max(String label) throws LabelNotFound {
+        List<String> columnLabels = df.getColumnLabels();
         for (String columnName : columnLabels) {
-
             Column<?> column = df.getColumn(columnName);
-            if (column.getLabel().equals(column) && 
+            if (column.getLabel().equals(label) && 
                 (column.getType() == Integer.class || column.getType() == Double.class || column.getType() == Float.class)) {
                     double max = Double.MIN_VALUE;
                     for (Cell<?> cell : column.getCells()) {
@@ -81,14 +76,13 @@ class GroupedDataFrame {
                             max = Math.max(max, (double) cell.getValue());
                         }
                     }
-                    System.out.println("Max of " + columnName + " is " + max);
-            } else {
-                throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
+                    return max;
             }
         }
+        throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
     }
 
-    public void count(String label) throws LabelNotFound {
+    public int count(String label) throws LabelNotFound {
         List<String> columnLabels = df.getColumnLabels();
         for (String columnName : columnLabels) {
             Column<?> column = df.getColumn(columnName);
@@ -99,12 +93,13 @@ class GroupedDataFrame {
                         count++;
                     }
                 }
-                System.out.println("Count of " + columnName + " is " + count);
+                return count;
             }
         }
+        throw new LabelNotFound("Label not found in columns.");
     }
 
-    public void std(String label) throws LabelNotFound {
+    public double std(String label) throws LabelNotFound {
         List<String> columnLabels = df.getColumnLabels();
         for (String columnName : columnLabels) {
             Column<?> column = df.getColumn(columnName);
@@ -120,15 +115,13 @@ class GroupedDataFrame {
                             count++;
                         }
                     }
-                    double std = Math.sqrt((sumSquared - Math.pow(sum, 2) / count) / (count - 1));
-                    System.out.println("Std of " + columnName + " is " + std);
-            } else {
-                throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
+                    return Math.sqrt((sumSquared - Math.pow(sum, 2) / count) / (count - 1));
             }
         }
+        throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
     }
 
-    public void var(String label) throws LabelNotFound {
+    public double var(String label) throws LabelNotFound {
         List<String> columnLabels = df.getColumnLabels();
         for (String columnName : columnLabels) {
             Column<?> column = df.getColumn(columnName);
@@ -144,11 +137,9 @@ class GroupedDataFrame {
                             count++;
                         }
                     }
-                    double var = (sumSquared - Math.pow(sum, 2) / count) / (count - 1);
-                    System.out.println("Var of " + columnName + " is " + var);
-            } else {
-                throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
+                    return (sumSquared - Math.pow(sum, 2) / count) / (count - 1);
+            }
         }
-    }
+        throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
     }
 }

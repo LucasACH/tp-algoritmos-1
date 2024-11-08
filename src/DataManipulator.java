@@ -49,7 +49,7 @@ class DataManipulator {
         for (String columnName : columnNames) {
             int columnIndex = columnLabels.indexOf(columnName);
             if (columnIndex == -1) {
-                throw new LabelNotFound();
+                throw new LabelNotFound("Label not found in columns.");
             }
             columnIndices.add(columnIndex);
         }
