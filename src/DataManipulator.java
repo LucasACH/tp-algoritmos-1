@@ -1,7 +1,9 @@
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.Random;
 import java.util.Set;
@@ -111,8 +113,33 @@ class DataManipulator {
         }
     }
 
-    public void filter(String name, Predicate<String> function) {
-        // filter the DataFrame by the specified function
+    public DataFrame filter(String columnName, Predicate<Object> condition) throws LabelNotFound, InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
+        // Validar que la columna especificada exista en el DataFrame
+        List<String> columnLabels = this.dataframe.getColumnLabels();
+        int columnIndex = columnLabels.indexOf(columnName);
+        if (columnIndex == -1) {
+            throw new LabelNotFound("La columna '" + columnName + "' no se encontró en el DataFrame.");
+        }
+
+        // Crear un nuevo DataFrame para almacenar las filas que cumplan con el filtro
+        DataFrame filteredDataFrame = new DataFrame();
+        for (String columnLabel : columnLabels) {
+            filteredDataFrame.insertColumn(columnLabel);
+        }
+
+        // Filtrar las filas del DataFrame original
+        for (Row row : this.dataframe.getRows()) {
+            Cell<?> cell = row.getCell(columnIndex);
+            if (condition.test(cell.getValue())) { // Verificar si el valor cumple con la condición
+                List<Cell<?>> cells = new ArrayList<>();
+                for (int i = 0; i < row.getCells().size(); i++) {
+                    cells.add(row.getCell(i)); // Agregar las celdas de la fila al nuevo DataFrame
+                }
+                filteredDataFrame.insertRow(row.getLabel(), cells); // Insertar la fila en el nuevo DataFrame
+            }
+        }
+
+        return filteredDataFrame; // Retornar el DataFrame con las filas filtradas
     }
 
     public DataFrame sample(double frac) throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
@@ -147,7 +174,38 @@ class DataManipulator {
         return df; // Retornar el nuevo DataFrame con la muestra
     }
 
-    public void groupBy(List<String> columns) {
-        // group the DataFrame by the specified columns
+    public GroupedDataFrame groupBy(List<String> columns) throws LabelNotFound {
+        // Validar que las columnas especificadas existan en el DataFrame
+        List<String> columnLabels = this.dataframe.getColumnLabels();
+        List<Integer> columnIndices = new ArrayList<>();
+        for (String column : columns) {
+            int index = columnLabels.indexOf(column);
+            if (index == -1) {
+                throw new LabelNotFound("");
+            }
+            columnIndices.add(index); // Guardar los índices de las columnas para usarlos en la agrupación
+        }
+
+        // Crear el Map para almacenar los grupos
+        Map<String, List<Row>> groupedData = new HashMap<>();
+
+        // Iterar sobre las filas del DataFrame para agruparlas
+        for (Row row : this.dataframe.getRows()) {
+            // Crear la clave combinada para las columnas seleccionadas
+            StringBuilder keyBuilder = new StringBuilder();
+            for (int i = 0; i < columnIndices.size(); i++) {
+                Cell<?> cell = row.getCell(columnIndices.get(i));
+                keyBuilder.append(cell.getValue()); // Añadir el valor de la celda a la clave
+                if (i < columnIndices.size() - 1) {
+                    keyBuilder.append("%"); // Separador entre valores de las columnas
+                }
+            }
+            String key = keyBuilder.toString();
+
+            // Agregar la fila al grupo correspondiente en el Map
+            groupedData.computeIfAbsent(key, k -> new ArrayList<>()).add(row);
+        }
+
+        return new GroupedDataFrame(this.dataframe, groupedData);
     }
 }
