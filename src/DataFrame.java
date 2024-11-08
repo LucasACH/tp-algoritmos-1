@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 import exceptions.IndexOutOfBounds;
 import exceptions.InvalidShape;
@@ -13,12 +15,14 @@ class DataFrame implements Visualizer<DataFrame> {
     private List<Row> rows;
     public final DataManipulator manipulator;
     public final DataExporter exporter;
+    public final GroupedDataFrame groupedDataFrame;
         
         public DataFrame() {
             this.columns = new ArrayList<>();
             this.rows = new ArrayList<>();
             this.exporter = new DataExporter(this);
             this.manipulator = new DataManipulator(this);
+            this.groupedDataFrame = new GroupedDataFrame(this);
     }
 
     public DataFrame(List<Column<?>> columns) {
@@ -39,6 +43,7 @@ class DataFrame implements Visualizer<DataFrame> {
 
         this.manipulator = new DataManipulator(this);
         this.exporter = new DataExporter(this);
+        this.groupedDataFrame = new GroupedDataFrame(this);
     }
 
     // TODO: Imlementar constructor para crear DataFrame a partir de un arreglo de arreglos y estructura secuencial
@@ -294,7 +299,29 @@ class DataFrame implements Visualizer<DataFrame> {
         }
     }
 
+    public DataFrame filter(String columnName, Predicate<Object> condition){
+        try {
+            return manipulator.filter(columnName, condition);
+        } catch (LabelNotFound | InvalidShape | TypeDoesNotMatch | LabelAlreadyInUse | IndexOutOfBounds e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void fillna(String column, Object value){
+        try {
+            manipulator.fillna(column, value);
+        } catch (LabelNotFound e) {
+            e.printStackTrace();
+        }
+    }
+
     private enum ExportFormat {
         CSV, JSON
+    }
+
+    public Map<String, List<Row>> getGroupByData(String label) {
+        // TODO Volar a la mierda (?)
+        throw new UnsupportedOperationException("Unimplemented method 'getGroupByData'");
     }
 }
