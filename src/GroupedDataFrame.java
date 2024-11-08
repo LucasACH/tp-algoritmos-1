@@ -1,5 +1,7 @@
 import exceptions.LabelNotFound;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class GroupedDataFrame {
     private final DataFrame df;
@@ -8,138 +10,161 @@ class GroupedDataFrame {
         this.df = df;
     }
 
-    public double sum(String label) throws LabelNotFound {
-        List<String> columnLabels = df.getColumnLabels();
-        for (String columnName : columnLabels) {
-            Column<?> column = df.getColumn(columnName);
-            if (column.getLabel().equals(label) && 
-                (column.getType() == Integer.class || column.getType() == Double.class || column.getType() == Float.class)) {
-                    double sum = 0;
-                    for (Cell<?> cell : column.getCells()) {
-                        if (cell.getValue() != null) {
-                            sum += (double) cell.getValue();
-                        }
-                    }
-                    return sum;
-            }
-        }
-        throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
-    }
+    public Map<String, Double> sum(String label) throws LabelNotFound {
+        Map<String, Double> results = new HashMap<>();
+        Map<String, List<Row>> groupedData = df.getGroupByData(label);
 
-    public double mean(String label) throws LabelNotFound {
-        List<String> columnLabels = df.getColumnLabels();
-        for (String columnName : columnLabels) {
-            Column<?> column = df.getColumn(columnName);
-            if (column.getLabel().equals(label) && 
-                (column.getType() == Integer.class || column.getType() == Double.class || column.getType() == Float.class)) {
-                    double sum = 0;
-                    int count = 0;
-                    for (Cell<?> cell : column.getCells()) {
-                        if (cell.getValue() != null) {
-                            sum += (double) cell.getValue();
-                            count++;
-                        }
-                    }
-                    return sum / count;
-            }
-        }
-        throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
-    }
+        for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
+            String groupKey = entry.getKey();
+            List<Row> rows = entry.getValue();
+            double sum = 0;
 
-    public double min(String label) throws LabelNotFound {
-        List<String> columnLabels = df.getColumnLabels();
-        for (String columnName : columnLabels) {
-            Column<?> column = df.getColumn(columnName);
-            if (column.getLabel().equals(label) && 
-                (column.getType() == Integer.class || column.getType() == Double.class || column.getType() == Float.class)) {
-                    double min = Double.MAX_VALUE;
-                    for (Cell<?> cell : column.getCells()) {
-                        if (cell.getValue() != null) {
-                            min = Math.min(min, (double) cell.getValue());
-                        }
-                    }
-                    return min;
-            }
-        }
-        throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
-    }
-
-    public double max(String label) throws LabelNotFound {
-        List<String> columnLabels = df.getColumnLabels();
-        for (String columnName : columnLabels) {
-            Column<?> column = df.getColumn(columnName);
-            if (column.getLabel().equals(label) && 
-                (column.getType() == Integer.class || column.getType() == Double.class || column.getType() == Float.class)) {
-                    double max = Double.MIN_VALUE;
-                    for (Cell<?> cell : column.getCells()) {
-                        if (cell.getValue() != null) {
-                            max = Math.max(max, (double) cell.getValue());
-                        }
-                    }
-                    return max;
-            }
-        }
-        throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
-    }
-
-    public int count(String label) throws LabelNotFound {
-        List<String> columnLabels = df.getColumnLabels();
-        for (String columnName : columnLabels) {
-            Column<?> column = df.getColumn(columnName);
-            if (column.getLabel().equals(label)) {
-                int count = 0;
-                for (Cell<?> cell : column.getCells()) {
-                    if (cell.getValue() != null) {
-                        count++;
-                    }
+            for (Row row : rows) {
+                Column<?> column = row.getColumn(label);
+                if (column != null && column.getValue() != null) {
+                    sum += ((Number) column.getValue()).doubleValue();
                 }
-                return count;
             }
+            results.put(groupKey, sum);
         }
-        throw new LabelNotFound("Label not found in columns.");
+        return results;
     }
 
-    public double std(String label) throws LabelNotFound {
-        List<String> columnLabels = df.getColumnLabels();
-        for (String columnName : columnLabels) {
-            Column<?> column = df.getColumn(columnName);
-            if (column.getLabel().equals(label) && 
-                (column.getType() == Integer.class || column.getType() == Double.class || column.getType() == Float.class)) {
-                    double sum = 0;
-                    double sumSquared = 0;
-                    int count = 0;
-                    for (Cell<?> cell : column.getCells()) {
-                        if (cell.getValue() != null) {
-                            sum += (double) cell.getValue();
-                            sumSquared += Math.pow((double) cell.getValue(), 2);
-                            count++;
-                        }
-                    }
-                    return Math.sqrt((sumSquared - Math.pow(sum, 2) / count) / (count - 1));
+    public Map<String, Double> mean(String label) throws LabelNotFound {
+        Map<String, Double> results = new HashMap<>();
+        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+
+        for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
+            String groupKey = entry.getKey();
+            List<Row> rows = entry.getValue();
+            double sum = 0;
+            int count = 0;
+
+            for (Row row : rows) {
+                Column<?> column = row.getColumn(label);
+                if (column != null && column.getValue() != null) {
+                    sum += ((Number) column.getValue()).doubleValue();
+                    count++;
+                }
             }
+            results.put(groupKey, sum / count);
         }
-        throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
+        return results;
     }
 
-    public double var(String label) throws LabelNotFound {
-        List<String> columnLabels = df.getColumnLabels();
-        for (String columnName : columnLabels) {
-            Column<?> column = df.getColumn(columnName);
-            if (column.getLabel().equals(label) && 
-                (column.getType() == Integer.class || column.getType() == Double.class || column.getType() == Float.class)) {
-                    double sum = 0;
-                    double sumSquared = 0;
-                    int count = 0;
-                    for (Cell<?> cell : column.getCells()) {
-                        if (cell.getValue() != null) {
-                            sum += (double) cell.getValue();
-                            sumSquared += Math.pow((double) cell.getValue(), 2);
-                            count++;
-                        }
-                    }
-                    return (sumSquared - Math.pow(sum, 2) / count) / (count - 1);
+    public Map<String, Double> min(String label) throws LabelNotFound {
+        Map<String, Double> results = new HashMap<>();
+        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+
+        for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
+            String groupKey = entry.getKey();
+            List<Row> rows = entry.getValue();
+            double min = Double.MAX_VALUE;
+
+            for (Row row : rows) {
+                Column<?> column = row.getColumn(label);
+                if (column != null && column.getValue() != null) {
+                    min = Math.min(min, ((Number) column.getValue()).doubleValue());
+                }
             }
+            results.put(groupKey, min);
         }
-        throw new IllegalArgumentException("The column must contain only numeric values (Integer, Double or Float).");
+        return results;
+    }
+
+    public Map<String, Double> max(String label) throws LabelNotFound {
+        Map<String, Double> results = new HashMap<>();
+        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+
+        for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
+            String groupKey = entry.getKey();
+            List<Row> rows = entry.getValue();
+            double max = Double.MIN_VALUE;
+
+            for (Row row : rows) {
+                Column<?> column = row.getColumn(label);
+                if (column != null && column.getValue() != null) {
+                    max = Math.max(max, ((Number) column.getValue()).doubleValue());
+                }
+            }
+            results.put(groupKey, max);
+        }
+        return results;
+    }
+
+    public Map<String, Integer> count(String label) throws LabelNotFound {
+        Map<String, Integer> results = new HashMap<>();
+        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+
+        for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
+            String groupKey = entry.getKey();
+            List<Row> rows = entry.getValue();
+            int count = 0;
+
+            for (Row row : rows) {
+                Column<?> column = row.getColumn(label);
+                if (column != null && column.getValue() != null) {
+                    count++;
+                }
+            }
+            results.put(groupKey, count);
+        }
+        return results;
+    }
+
+    public Map<String, Double> std(String label) throws LabelNotFound {
+        Map<String, Double> results = new HashMap<>();
+        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+
+        for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
+            String groupKey = entry.getKey();
+            List<Row> rows = entry.getValue();
+            double sum = 0;
+            double sumSquared = 0;
+            int count = 0;
+
+            for (Row row : rows) {
+                Column<?> column = row.getColumn(label);
+                if (column != null && column.getValue() != null) {
+                    double value = ((Number) column.getValue()).doubleValue();
+                    sum += value;
+                    sumSquared += value * value;
+                    count++;
+                }
+            }
+
+            double mean = sum / count;
+            double stdDev = Math.sqrt((sumSquared / count) - (mean * mean));
+            results.put(groupKey, stdDev);
+        }
+        return results;
+    }
+
+    public Map<String, Double> var(String label) throws LabelNotFound {
+        Map<String, Double> results = new HashMap<>();
+        Map<String, List<Row>> groupedData = df.getGroupByData(label);
+
+        for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
+            String groupKey = entry.getKey();
+            List<Row> rows = entry.getValue();
+            double sum = 0;
+            double sumSquared = 0;
+            int count = 0;
+
+            for (Row row : rows) {
+                Column<?> column = row.getColumn(label);
+                if (column != null && column.getValue() != null) {
+                    double value = ((Number) column.getValue()).doubleValue();
+                    sum += value;
+                    sumSquared += value * value;
+                    count++;
+                }
+            }
+
+            double mean = sum / count;
+            double variance = (sumSquared / count) - (mean * mean);
+            results.put(groupKey, variance);
+        }
+        return results;
     }
 }
