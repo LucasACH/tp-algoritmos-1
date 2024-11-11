@@ -111,7 +111,7 @@ public class Cell<T> implements Comparable<Cell<T>> {
         } else if (value instanceof Comparable) {
             return ((Comparable) value).compareTo(o.value);
         } else {
-            throw new UnsupportedOperationException("Operación no soportada");
+            throw new UnsupportedOperationException("Imposible to compare values of this type");
         }
     }
 }

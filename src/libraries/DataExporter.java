@@ -35,6 +35,11 @@ public class DataExporter {
         }
     }
 
+    /**
+     * @param headers
+     * @param writer
+     * @throws IOException
+     */
     private static void writeCSVHeaders(List<Object> headers, FileWriter writer) throws IOException {
         writer.write(String.join(",", headers.stream().map(Object::toString).toList()));
         writer.write("\n");

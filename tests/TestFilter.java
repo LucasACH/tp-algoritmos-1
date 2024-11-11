@@ -6,6 +6,11 @@ import libraries.DataImporter;
 import structures.DataFrame;
 
 public class TestFilter {
+
+    /**
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         // Crear un DataFrame
         DataFrame df = DataImporter.readCSV("data/dummy.csv");

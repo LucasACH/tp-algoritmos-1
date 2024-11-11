@@ -6,6 +6,11 @@ import libraries.DataImporter;
 import structures.DataFrame;
 
 public class TestReadCSV {
+
+    /**
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         DataFrame df = DataImporter.readCSV("data/dummy.csv");
 

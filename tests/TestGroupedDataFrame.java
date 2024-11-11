@@ -5,6 +5,11 @@ import structures.DataFrame;
 import structures.GroupedDataFrame;
 
 public class TestGroupedDataFrame {
+
+    /**
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         DataFrame df = DataImporter.readCSV("data/dummy.csv");
 

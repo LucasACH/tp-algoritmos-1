@@ -40,6 +40,10 @@ public class DataImporter {
         }
     }
 
+    /**
+     * @param headerLine
+     * @return List<String>
+     */
     private static List<String> parseHeaders(String headerLine) {
         List<String> headers = new ArrayList<>();
         for (String header : headerLine.split(",")) {

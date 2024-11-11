@@ -64,14 +64,10 @@ public class DataFrame implements Visualizer<DataFrame> {
     }
 
     /**
-     * Inicializa las columnas utilizando las filas y encabezados proporcionados.
-     *
-     * @param rows    lista de filas que contienen datos.
-     * @param headers lista de encabezados de columna.
-     * @throws InvalidShape     si las filas no coinciden en tamaño con los
-     *                          encabezados.
-     * @throws TypeDoesNotMatch si los tipos de datos de las celdas no son
-     *                          consistentes.
+     * @param rows
+     * @param headers
+     * @throws InvalidShape
+     * @throws TypeDoesNotMatch
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void initializeColumnsFromData(List<?> rows, List<?> headers) throws InvalidShape, TypeDoesNotMatch {
@@ -136,12 +132,6 @@ public class DataFrame implements Visualizer<DataFrame> {
         initializeRowsWithCells(columns);
     }
 
-    /**
-     * Inicializa las filas utilizando las celdas de las columnas.
-     *
-     * @param columns columnas que contienen datos para formar las filas.
-     * @throws IndexOutOfBounds si el índice de una columna excede los límites.
-     */
     private void initializeRowsWithCells(List<Column<?>> columns) throws IndexOutOfBounds {
         for (int i = 0; i < countRows(); i++) {
             List<Cell<?>> cells = new ArrayList<>();
@@ -180,17 +170,6 @@ public class DataFrame implements Visualizer<DataFrame> {
         return this;
     }
 
-    /**
-     * Inserta una nueva fila en el DataFrame con la etiqueta proporcionada.
-     *
-     * @param label etiqueta de la fila.
-     * @param row   datos de la fila a insertar.
-     * @return la instancia del DataFrame.
-     * @throws InvalidShape      si la forma de la fila no coincide con el marco de
-     *                           datos.
-     * @throws TypeDoesNotMatch  si los tipos de las celdas no coinciden.
-     * @throws LabelAlreadyInUse si la etiqueta de la fila ya está en uso.
-     */
     private void insertCells(Object label, List<Cell<?>> cells)
             throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
         assignCellsToColumns(cells);
@@ -204,16 +183,6 @@ public class DataFrame implements Visualizer<DataFrame> {
         rows.add(new Row(label, cells));
     }
 
-    /**
-     * Asigna las celdas a las columnas correspondientes.
-     *
-     * @param cells lista de celdas a asignar.
-     * @throws InvalidShape     si la forma de las celdas no coincide con el número
-     *                          de
-     *                          columnas.
-     * @throws TypeDoesNotMatch si el tipo de datos de las celdas no coincide con el
-     *                          tipo de las columnas.
-     */
     @SuppressWarnings("unchecked")
     private void assignCellsToColumns(List<Cell<?>> cells) throws InvalidShape, TypeDoesNotMatch {
         validateShape(cells);
@@ -254,15 +223,6 @@ public class DataFrame implements Visualizer<DataFrame> {
         return this;
     }
 
-    /**
-     * Crea una nueva columna con los datos proporcionados.
-     *
-     * @param label etiqueta de la columna.
-     * @param data  datos de la columna.
-     * @return la nueva columna creada.
-     * @throws TypeDoesNotMatch si el tipo de datos no coincide con el tipo de la
-     *                          columna.
-     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private Column<?> createColumnWithData(Object label, List<?> data) throws TypeDoesNotMatch {
         Column<?> column = new Column<>(label);
@@ -485,24 +445,12 @@ public class DataFrame implements Visualizer<DataFrame> {
         return labels;
     }
 
-    /**
-     * Valida la forma de las celdas.
-     * 
-     * @param cells lista de celdas a validar.
-     * @throws InvalidShape si la forma de las celdas no es válida.
-     */
     private void validateShape(List<Cell<?>> cells) throws InvalidShape {
         if (cells.size() != columns.size()) {
             throw new InvalidShape();
         }
     }
 
-    /**
-     * Valida la forma de las columnas.
-     * 
-     * @param column lista de celdas a validar.
-     * @throws InvalidShape si la forma de las columnas no es válida.
-     */
     private void validateColumnShape(List<?> column) throws InvalidShape {
         if (column instanceof Column) {
             if (!columns.isEmpty() && ((Column<?>) column).getCells().size() != countRows()) {
@@ -515,40 +463,16 @@ public class DataFrame implements Visualizer<DataFrame> {
         }
     }
 
-    /**
-     * Verifica si el índice de fila es válido.
-     * 
-     * @param index índice de fila.
-     * @return true si el índice es válido, de lo contrario false.
-     */
     private boolean isValidRowIndex(int index) {
         return index >= 0 && index < countRows();
     }
 
-    /**
-     * Valida los índices de fila y columna.
-     * 
-     * @param rowIndex    índice de fila.
-     * @param columnIndex índice de columna.
-     * @throws IndexOutOfBounds si los índices están fuera de los límites.
-     */
     private void validateIndices(int rowIndex, int columnIndex) throws IndexOutOfBounds {
         if (!isValidRowIndex(rowIndex) || columnIndex < 0 || columnIndex >= countColumns()) {
             throw new IndexOutOfBounds();
         }
     }
 
-    /**
-     * Crea un nuevo DataFrame con las filas en el rango especificado.
-     * 
-     * @param start índice de la primera fila.
-     * @param end   índice de la última fila.
-     * @return un nuevo DataFrame con las filas en el rango especificado.
-     * @throws IndexOutOfBounds si los índices están fuera de los límites.
-     * @throws InvalidShape     si las dimensiones del nuevo DataFrame no son
-     *                          válidas.
-     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
-     */
     private DataFrame createSubDataFrame(int start, int end) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
         List<Column<?>> newColumns = new ArrayList<>();
         for (Column<?> column : this.getColumns()) {
@@ -562,13 +486,6 @@ public class DataFrame implements Visualizer<DataFrame> {
         return new DataFrame(newColumns);
     }
 
-    /**
-     * Exporta los datos del DataFrame a un archivo.
-     * 
-     * @param path   ruta del archivo.
-     * @param format formato de exportación.
-     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
-     */
     private void exportData(String path, ExportFormat format) throws IndexOutOfBounds {
         try {
             if (format == ExportFormat.CSV) {
@@ -581,11 +498,6 @@ public class DataFrame implements Visualizer<DataFrame> {
         }
     }
 
-    /**
-     * Añade las etiquetas de las columnas al StringBuilder.
-     * 
-     * @param sb StringBuilder para añadir las etiquetas.
-     */
     private void appendColumnHeaders(StringBuilder sb) {
         List<Object> columnLabels = getColumnLabels();
         List<Integer> columnWidths = calculateColumnWidths(columnLabels);
