@@ -1,12 +1,11 @@
 package structures;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import exceptions.IndexOutOfBounds;
 import exceptions.TypeDoesNotMatch;
+import interfaces.CopyableStructure;
 
 /**
  * La clase Column representa una columna que contiene una lista de celdas
@@ -16,7 +15,7 @@ import exceptions.TypeDoesNotMatch;
  *
  * @param <T> Tipo de dato que almacenan las celdas de la columna.
  */
-public class Column<T> {
+public class Column<T> implements CopyableStructure<Column<T>> {
     private List<Cell<T>> cells;
     private Object label;
 
@@ -95,17 +94,6 @@ public class Column<T> {
     }
 
     /**
-     * Elimina la celda en el índice especificado.
-     *
-     * @param index Índice de la celda a eliminar.
-     * @throws IndexOutOfBounds si el índice está fuera de los límites.
-     */
-    public void deleteCell(int index) throws IndexOutOfBounds {
-        checkIndexBounds(index);
-        cells.remove(index);
-    }
-
-    /**
      * Obtiene la etiqueta de la columna.
      *
      * @return La etiqueta de la columna.
@@ -135,15 +123,15 @@ public class Column<T> {
     /**
      * Agrega una nueva celda a la columna.
      *
-     * @param cell La celda a agregar.
+     * @param value La celda a agregar.
      * @throws TypeDoesNotMatch si el tipo de la celda no coincide con el tipo de la
      *                          columna.
      */
-    public void addCell(Cell<T> cell) throws TypeDoesNotMatch {
-        if (!isSameType(cell)) {
+    public void addCell(Cell<T> value) throws TypeDoesNotMatch {
+        if (!isSameType(value)) {
             throw new TypeDoesNotMatch();
         }
-        cells.add(cell);
+        cells.add(value);
     }
 
     /**
@@ -162,6 +150,7 @@ public class Column<T> {
      *
      * @return Una nueva instancia de Column con los mismos valores.
      */
+    @Override
     public Column<T> copy() {
         List<Cell<T>> copiedCells = new ArrayList<>();
         for (Cell<T> cell : cells) {
@@ -184,27 +173,8 @@ public class Column<T> {
      *
      * @return Tamaño de la columna.
      */
-    public int getSize() {
+    public int size() {
         return this.cells.size();
-    }
-
-    /**
-     * Ordena las celdas de la columna en orden ascendente o descendente.
-     *
-     * @param descending true para ordenar en orden descendente, false para
-     *                   ascendente.
-     */
-    public void sort(boolean descending) {
-        Comparator<Cell<T>> comparator = new Comparator<Cell<T>>() {
-            @Override
-            public int compare(Cell<T> cell1, Cell<T> cell2) {
-                int comparisonResult = cell1.compareTo(cell2);
-
-                return descending ? -comparisonResult : comparisonResult;
-            }
-        };
-
-        Collections.sort(this.cells, comparator);
     }
 
     /**

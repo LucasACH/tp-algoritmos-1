@@ -1,3 +1,5 @@
+package tests;
+
 import structures.Cell;
 
 public class TestCellCompare {

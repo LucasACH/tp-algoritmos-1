@@ -1,15 +1,18 @@
 package structures;
 
 import exceptions.TypeDoesNotMatch;
+import interfaces.CopyableStructure;
 
 /**
  * La clase Cell representa una celda genérica que puede almacenar un valor de
  * cualquier tipo.
  * Implementa la interfaz Comparable para permitir la comparación entre celdas.
+ * Además, implementa la interfaz CopyableStructure para permitir la creación de
+ * copias de celdas.
  *
  * @param <T> Tipo de dato que almacena la celda.
  */
-public class Cell<T> implements Comparable<Cell<T>> {
+public class Cell<T> implements Comparable<Cell<T>>, CopyableStructure<Cell<T>> {
     private T value;
 
     /**
@@ -72,6 +75,7 @@ public class Cell<T> implements Comparable<Cell<T>> {
      *
      * @return una nueva instancia de Cell con el mismo valor.
      */
+    @Override
     public Cell<T> copy() {
         return new Cell<>(value);
     }

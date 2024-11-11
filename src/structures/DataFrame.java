@@ -11,6 +11,7 @@ import exceptions.InvalidShape;
 import exceptions.LabelAlreadyInUse;
 import exceptions.LabelNotFound;
 import exceptions.TypeDoesNotMatch;
+import interfaces.CopyableStructure;
 import interfaces.Visualizer;
 import libraries.DataExporter;
 import libraries.DataManipulator;
@@ -23,7 +24,7 @@ import libraries.DataManipulator;
  * Este marco de datos utiliza filas y columnas dinámicas para almacenar
  * diferentes tipos de datos.
  */
-public class DataFrame implements Visualizer<DataFrame> {
+public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataFrame> {
     private List<Column<?>> columns;
     private List<Row> rows;
     private final DataManipulator manipulator;
@@ -342,6 +343,7 @@ public class DataFrame implements Visualizer<DataFrame> {
      * @throws LabelAlreadyInUse
      * @throws IndexOutOfBounds
      */
+    @Override
     public DataFrame copy() throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
         List<Column<?>> copiedColumns = new ArrayList<>();
         for (int i = 0; i < countColumns(); i++) {

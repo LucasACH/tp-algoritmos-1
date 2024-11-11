@@ -11,17 +11,19 @@ import exceptions.LabelNotFound;
 import exceptions.TypeDoesNotMatch;
 
 /**
- * GroupedDataFrame provides grouped operations (sum, mean, min, max, etc.)
- * on a DataFrame based on specified group keys.
+ * La clase GroupedDataFrame representa un DataFrame agrupado por una o más
+ * columnas.
+ * 
+ * Permite realizar operaciones de agregación como sum, mean, min, max, count,
  */
 public class GroupedDataFrame {
     private final DataFrame df;
     private final Map<String, List<Row>> groupedData;
 
     /**
-     * Constructor for GroupedDataFrame that initializes with an existing DataFrame.
+     * Constructor para GroupedDataFrame con DataFrame original.
      *
-     * @param df DataFrame to be grouped
+     * @param df DataFrame original
      */
     public GroupedDataFrame(DataFrame df) {
         this.df = df;
@@ -29,10 +31,10 @@ public class GroupedDataFrame {
     }
 
     /**
-     * Constructor for GroupedDataFrame with grouped data specified.
+     * Constructor para GroupedDataFrame con DataFrame original y datos agrupados.
      *
-     * @param df          Original DataFrame
-     * @param groupedData Grouped data by keys
+     * @param df          DataFrame original
+     * @param groupedData Datos agrupados
      */
     public GroupedDataFrame(DataFrame df, Map<String, List<Row>> groupedData) {
         this.df = df;
@@ -40,73 +42,95 @@ public class GroupedDataFrame {
     }
 
     /**
-     * Prints the grouped data to console.
+     * Imprime el DataFrame agrupado.
      */
     public void show() {
         System.out.println(this);
     }
 
     /**
-     * Sums the values for a specified label in each group.
-     *
-     * @param label Column label to sum
-     * @return Map of group keys to their summed values
-     * @throws LabelNotFound    If the label does not exist in the DataFrame
-     * @throws IndexOutOfBounds If column index is invalid
+     * Suma los valores de una columna en cada grupo.
+     * 
+     * @param label Etiqueta de la columna
+     * @return Mapa con la suma de los valores en cada grupo
+     * @throws LabelNotFound    si la etiqueta no se encuentra en el DataFrame
+     * @throws IndexOutOfBounds si el índice está fuera de los límites
      */
-    public Map<Object, Double> sum(Object label) throws LabelNotFound, IndexOutOfBounds {
+    public Map<String, Double> sum(Object label) throws LabelNotFound, IndexOutOfBounds {
         return aggregate(label, "sum");
     }
 
     /**
-     * Calculates the mean for a specified label in each group.
+     * Calcula el promedio de los valores de una columna en cada grupo.
+     * 
+     * @param label Etiqueta de la columna
+     * @return Mapa con el promedio de los valores en cada grupo
+     * @throws LabelNotFound    si la etiqueta no se encuentra en el DataFrame
+     * @throws IndexOutOfBounds si el índice está fuera de los límites
      */
-    public Map<Object, Double> mean(Object label) throws LabelNotFound, IndexOutOfBounds {
+    public Map<String, Double> mean(Object label) throws LabelNotFound, IndexOutOfBounds {
         return aggregate(label, "mean");
     }
 
     /**
-     * Finds the minimum value for a specified label in each group.
+     * Encuentra el valor mínimo para una etiqueta especificada en cada grupo.
+     * 
+     * @param label Etiqueta de la columna
+     * @return Mapa con el valor mínimo en cada grupo
+     * @throws LabelNotFound    si la etiqueta no se encuentra en el DataFrame
+     * @throws IndexOutOfBounds si el índice está fuera de los límites
      */
-    public Map<Object, Double> min(Object label) throws LabelNotFound, IndexOutOfBounds {
+    public Map<String, Double> min(Object label) throws LabelNotFound, IndexOutOfBounds {
         return aggregate(label, "min");
     }
 
     /**
-     * Finds the maximum value for a specified label in each group.
+     * Encuentra el valor máximo para una etiqueta especificada en cada grupo.
+     * 
+     * @param label Etiqueta de la columna
+     * @return Mapa con el valor máximo en cada grupo
+     * @throws LabelNotFound    si la etiqueta no se encuentra en el DataFrame
+     * @throws IndexOutOfBounds si el índice está fuera de los límites
      */
-    public Map<Object, Double> max(Object label) throws LabelNotFound, IndexOutOfBounds {
+    public Map<String, Double> max(Object label) throws LabelNotFound, IndexOutOfBounds {
         return aggregate(label, "max");
     }
 
     /**
-     * Counts the non-null values for a specified label in each group.
+     * Cuenta el número de valores no nulos en una columna en cada grupo.
+     * 
+     * @param label Etiqueta de la columna
+     * @return Mapa con el número de valores no nulos en cada grupo
+     * @throws LabelNotFound    si la etiqueta no se encuentra en el DataFrame
+     * @throws IndexOutOfBounds si el índice está fuera de los límites
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Map<Object, Integer> count(Object label) throws LabelNotFound, IndexOutOfBounds {
+    public Map<String, Integer> count(Object label) throws LabelNotFound, IndexOutOfBounds {
         return (Map) aggregate(label, "count");
     }
 
     /**
-     * Calculates the standard deviation for a specified label in each group.
+     * Calcula la desviación estándar para una etiqueta especificada en cada grupo.
+     * 
+     * @param label Etiqueta de la columna
+     * @return Mapa con la desviación estándar en cada grupo
+     * @throws LabelNotFound    si la etiqueta no se encuentra en el DataFrame
+     * @throws IndexOutOfBounds si el índice está fuera de los límites
      */
-    public Map<Object, Double> std(Object label) throws LabelNotFound, IndexOutOfBounds {
+    public Map<String, Double> std(Object label) throws LabelNotFound, IndexOutOfBounds {
         return aggregate(label, "std");
     }
 
     /**
      * Calculates the variance for a specified label in each group.
      */
-    public Map<Object, Double> var(Object label) throws LabelNotFound, IndexOutOfBounds {
+    public Map<String, Double> var(Object label) throws LabelNotFound, IndexOutOfBounds {
         return aggregate(label, "var");
     }
 
-    /**
-     * Aggregates data by performing the specified operation.
-     */
-    private Map<Object, Double> aggregate(Object label, String operation)
+    private Map<String, Double> aggregate(Object label, String operation)
             throws LabelNotFound, IndexOutOfBounds {
-        Map<Object, Double> results = new HashMap<>();
+        Map<String, Double> results = new HashMap<>();
         int columnIndex = df.getColumnLabels().indexOf(label);
         if (columnIndex < 0)
             throw new LabelNotFound("Label " + label + " not found.");
