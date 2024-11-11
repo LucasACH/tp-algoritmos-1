@@ -1,8 +1,11 @@
-import exceptions.IndexOutOfBounds;
-import exceptions.LabelNotFound;
+package structures;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import exceptions.IndexOutOfBounds;
+import exceptions.LabelNotFound;
 
 class GroupedDataFrame {
     private final DataFrame df;
@@ -10,7 +13,7 @@ class GroupedDataFrame {
 
     public GroupedDataFrame(DataFrame df) {
         this.df = df;
-        this.groupedData = new HashMap<String, List<Row>>(); 
+        this.groupedData = new HashMap<String, List<Row>>();
     }
 
     public GroupedDataFrame(DataFrame df, Map<String, List<Row>> groupedData) {
@@ -21,7 +24,7 @@ class GroupedDataFrame {
     public Map<String, Double> sum(String label) throws LabelNotFound, IndexOutOfBounds {
         Map<String, Double> results = new HashMap<>();
         int columnIndex = df.getColumnLabels().indexOf(label);
-       
+
         for (Map.Entry<String, List<Row>> entry : this.groupedData.entrySet()) {
             String groupKey = entry.getKey();
             List<Row> rows = entry.getValue();

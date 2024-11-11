@@ -1,6 +1,8 @@
+package structures;
+
 import exceptions.TypeDoesNotMatch;
 
-class Cell<T> implements Comparable<Cell<T>> {
+public class Cell<T> implements Comparable<Cell<T>> {
     private T value;
 
     public Cell(T value) {
@@ -38,6 +40,7 @@ class Cell<T> implements Comparable<Cell<T>> {
         return isEmpty() ? "" : value.toString();
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public int compareTo(Cell<T> o) {
         if (isEmpty() && o.isEmpty()) {
@@ -48,7 +51,7 @@ class Cell<T> implements Comparable<Cell<T>> {
             return 1;
         } else if (value instanceof Comparable) {
             return ((Comparable) value).compareTo(o.value);
-        } else{
+        } else {
             throw new UnsupportedOperationException("Unsupported operation");
         }
     }

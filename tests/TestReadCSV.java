@@ -1,26 +1,28 @@
 import java.util.Arrays;
 
+import exceptions.TypeDoesNotMatch;
+import libraries.DataImporter;
+import structures.DataFrame;
+
 public class TestReadCSV {
     public static void main(String[] args) throws Exception {
         DataFrame df = DataImporter.readCSV("data/dummy.csv");
 
-        assert df.countRows() == 5;
-        assert df.countColumns() == 5;
+        try {
+            df.fillna("City", 1);
+        } catch (Exception e) {
+            assert TypeDoesNotMatch.class.isInstance(e);
+        }
 
-        assert df.getColumn("Name") == df.getColumns().get(0);
-        assert df.getColumn("Age") == df.getColumns().get(1);
-        assert df.getColumn("City") == df.getColumns().get(2);
-        assert df.getColumn("Occupation") == df.getColumns().get(3);
-        assert df.getColumn("Salary") == df.getColumns().get(4);
+        df.fillna("City", "N/A");
+        assert df.getCell(6, 3).equals("N/A");
 
-        assert df.copy() != df;
+        df.filter("Age", (value) -> (int) value > 30);
 
-        df.insertRow(Arrays.asList(
-                new Cell<>("John"),
-                new Cell<>(25), new Cell<>("New York"),
-                new Cell<>("Developer"),
-                new Cell<>(50000)));
+        df.sortBy(Arrays.asList(
+                "Age", "Salary"), true).show();
 
         df.show();
+
     }
 }

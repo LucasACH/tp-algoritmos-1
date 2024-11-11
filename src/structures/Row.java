@@ -1,8 +1,8 @@
-import exceptions.IndexOutOfBounds;
-import java.util.ArrayList;
+package structures;
+
 import java.util.List;
 
-class Row {
+public class Row {
     private Object label;
     private List<Cell<?>> cells;
 
@@ -31,6 +31,10 @@ class Row {
         this.label = label;
     }
 
+    public int size() {
+        return cells.size();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -41,6 +45,5 @@ class Row {
         sb.append("]");
         return sb.toString();
     }
-
 
 }

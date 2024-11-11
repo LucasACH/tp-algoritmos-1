@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import libraries.DataImporter;
+
 public class TestSortBy {
     public static void main(String[] args) throws Exception {
         DataFrame df = DataImporter.readCSV("data/dummy.csv");
@@ -20,7 +22,6 @@ public class TestSortBy {
         DataFrame df3 = df2.manipulator.sample(0.5);
         System.out.println("Sampled DataFrame:");
         df3.show();
-
 
         // Column columna = df.getColumn("Name");
         // System.out.println(columna);

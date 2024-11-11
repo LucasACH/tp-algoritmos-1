@@ -1,7 +1,8 @@
+package structures;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import exceptions.IndexOutOfBounds;
@@ -9,14 +10,17 @@ import exceptions.InvalidShape;
 import exceptions.LabelAlreadyInUse;
 import exceptions.LabelNotFound;
 import exceptions.TypeDoesNotMatch;
+import interfaces.Visualizer;
+import libraries.DataExporter;
+import libraries.DataManipulator;
 
-class DataFrame implements Visualizer<DataFrame> {
+public class DataFrame implements Visualizer<DataFrame> {
     private List<Column<?>> columns;
     private List<Row> rows;
     public final DataManipulator manipulator;
     public final DataExporter exporter;
     public final GroupedDataFrame groupedDataFrame;
-        
+
     public DataFrame() {
         this.columns = new ArrayList<>();
         this.rows = new ArrayList<>();
@@ -25,39 +29,98 @@ class DataFrame implements Visualizer<DataFrame> {
         this.groupedDataFrame = new GroupedDataFrame(this);
     }
 
-    public DataFrame(List<Column<?>> columns) {
-        this.columns = columns;
-
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public DataFrame(List<List<?>> rows, List<?> headers) throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
+        this.columns = new ArrayList<>();
         this.rows = new ArrayList<>();
+        this.exporter = new DataExporter(this);
+        this.manipulator = new DataManipulator(this);
+        this.groupedDataFrame = new GroupedDataFrame(this);
+
+        for (List<?> row : rows) {
+            if (row.size() != headers.size()) {
+                throw new InvalidShape();
+            }
+        }
+
+        for (int i = 0; i < headers.size(); i++) {
+            Column<?> column = new Column<>(headers.get(i).toString());
+            for (List<?> row : rows) {
+                column.addCell(new Cell(row.get(i)));
+            }
+            columns.add(column);
+        }
+
+        initializeRowsWithCells(columns);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public DataFrame(List<?> rows) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
+        this.columns = new ArrayList<>();
+        this.rows = new ArrayList<>();
+        this.exporter = new DataExporter(this);
+        this.manipulator = new DataManipulator(this);
+        this.groupedDataFrame = new GroupedDataFrame(this);
+
+        if (rows.get(0) instanceof Column) {
+            this.columns = (List<Column<?>>) rows;
+        }
+
+        if (rows.get(0) instanceof List<?>) {
+
+            List<String> headers = new ArrayList<>();
+
+            for (int i = 0; i < ((List<?>) rows.get(0)).size(); i++) {
+                headers.add("Column " + i);
+            }
+
+            for (List<?> row : (List<List<?>>) rows) {
+                if (row.size() != headers.size()) {
+                    throw new InvalidShape();
+                }
+            }
+
+            for (int i = 0; i < headers.size(); i++) {
+                Column<?> column = new Column<>(headers.get(i).toString());
+                for (List<?> row : (List<List<?>>) rows) {
+                    column.addCell(new Cell(row.get(i)));
+                }
+                columns.add(column);
+            }
+        }
+
+        initializeRowsWithCells(columns);
+    }
+
+    private void initializeRowsWithCells(List<Column<?>> columns) throws IndexOutOfBounds {
         for (int i = 0; i < countRows(); i++) {
             List<Cell<?>> cells = new ArrayList<>();
             for (Column<?> column : columns) {
-                try {
-                    cells.add(column.getCell(i));
-                } catch (IndexOutOfBounds e) {
-                    e.printStackTrace();
-                }
+                cells.add(column.getCell(i));
             }
             rows.add(new Row(i, cells));
         }
-
-        this.manipulator = new DataManipulator(this);
-        this.exporter = new DataExporter(this);
-        this.groupedDataFrame = new GroupedDataFrame(this);
     }
-
-    // TODO: Imlementar constructor para crear DataFrame a partir de un arreglo de arreglos y estructura secuencial
 
     private enum ExportFormat {
         CSV, JSON
     }
 
-    public DataFrame insertRow(List<Cell<?>> cells) throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
-        insertCells(countRows(), cells);
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public DataFrame insertRow(List<?> row) throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
+        if (row.get(0) instanceof Cell) {
+            insertCells(countRows(), (List<Cell<?>>) row);
+        } else {
+            List<Cell<?>> cells = new ArrayList<>();
+            for (int i = 0; i < row.size(); i++) {
+                cells.add(new Cell(row.get(i)));
+            }
+            insertCells(countRows(), cells);
+        }
         return this;
     }
 
-    public <T> DataFrame insertRow(T label, List<Cell<?>> cells)
+    public DataFrame insertRow(Object label, List<Cell<?>> cells)
             throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
         insertCells(label, cells);
         return this;
@@ -86,14 +149,36 @@ class DataFrame implements Visualizer<DataFrame> {
 
     }
 
-    public DataFrame insertColumn(Column<?> column) throws InvalidShape {
-        validateColumnShape(column);
+    public DataFrame insertColumn(Object label) throws InvalidShape, TypeDoesNotMatch {
+        Column<?> column = new Column<>(label);
         columns.add(column);
         return this;
     }
 
-    public DataFrame insertColumn(String label) throws InvalidShape {
+    public DataFrame insertColumn(Object label, List<?> data) throws InvalidShape, TypeDoesNotMatch {
+        validateColumnShape(data);
+        Column<?> column = createColumnWithData(label, data);
+        columns.add(column);
+        return this;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private Column<?> createColumnWithData(Object label, List<?> data) throws TypeDoesNotMatch {
         Column<?> column = new Column<>(label);
+        for (int i = 0; i < data.size(); i++) {
+            column.addCell(new Cell(data.get(i)));
+        }
+        return column;
+    }
+
+    public DataFrame insertColumn(List<?> data) throws InvalidShape, TypeDoesNotMatch {
+        validateColumnShape(data);
+        Column<?> column = createColumnWithData("Column " + countColumns(), data);
+        columns.add(column);
+        return this;
+    }
+
+    public DataFrame insertColumn(Column<?> column) throws InvalidShape {
         columns.add(column);
         return this;
     }
@@ -106,7 +191,7 @@ class DataFrame implements Visualizer<DataFrame> {
         return columns.size();
     }
 
-    public Column<?> getColumn(String label) throws LabelNotFound {
+    public Column<?> getColumn(Object label) throws LabelNotFound {
         return columns.stream()
                 .filter(column -> column.getLabel().equals(label))
                 .findFirst()
@@ -131,24 +216,23 @@ class DataFrame implements Visualizer<DataFrame> {
         ((Column<T>) columns.get(columnIndex)).setCell(rowIndex, value);
     }
 
-    public DataFrame copy() throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse ,IndexOutOfBounds{
+    public DataFrame copy() throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
         List<Column<?>> copiedColumns = new ArrayList<>();
         for (int i = 0; i < countColumns(); i++) {
             copiedColumns.add(columns.get(i).copy());
         }
-        DataFrame copy = new DataFrame(copiedColumns);
-        return copy;
+        return new DataFrame(copiedColumns);
     }
 
-    public DataFrame slice(int start, int end) {
+    public DataFrame slice(int start, int end) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
         return new DataFrame(columns.subList(start, end));
     }
 
-    public DataFrame head(int n) throws IndexOutOfBounds {
+    public DataFrame head(int n) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
         return createSubDataFrame(0, n);
     }
 
-    public DataFrame tail(int n) throws IndexOutOfBounds {
+    public DataFrame tail(int n) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
         return createSubDataFrame(countRows() - n, countRows());
     }
 
@@ -182,8 +266,8 @@ class DataFrame implements Visualizer<DataFrame> {
         return rows;
     }
 
-    public List<String> getColumnLabels() {
-        List<String> labels = new ArrayList<>();
+    public List<Object> getColumnLabels() {
+        List<Object> labels = new ArrayList<>();
         for (Column<?> column : columns) {
             labels.add(column.getLabel().toString());
         }
@@ -196,9 +280,15 @@ class DataFrame implements Visualizer<DataFrame> {
         }
     }
 
-    private void validateColumnShape(Column<?> column) throws InvalidShape {
-        if (!columns.isEmpty() && column.getCells().size() != countRows()) {
-            throw new InvalidShape();
+    private void validateColumnShape(List<?> column) throws InvalidShape {
+        if (column instanceof Column) {
+            if (!columns.isEmpty() && ((Column<?>) column).getCells().size() != countRows()) {
+                throw new InvalidShape();
+            }
+        } else {
+            if (column.size() != countRows()) {
+                throw new InvalidShape();
+            }
         }
     }
 
@@ -212,7 +302,7 @@ class DataFrame implements Visualizer<DataFrame> {
         }
     }
 
-    private DataFrame createSubDataFrame(int start, int end) throws IndexOutOfBounds {
+    private DataFrame createSubDataFrame(int start, int end) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
         List<Column<?>> newColumns = new ArrayList<>();
         for (Column<?> column : this.getColumns()) {
             try {
@@ -238,7 +328,7 @@ class DataFrame implements Visualizer<DataFrame> {
     }
 
     private void appendColumnHeaders(StringBuilder sb) {
-        List<String> columnLabels = getColumnLabels();
+        List<Object> columnLabels = getColumnLabels();
         List<Integer> columnWidths = calculateColumnWidths(columnLabels);
 
         columnLabels.add(0, "Label");
@@ -262,11 +352,11 @@ class DataFrame implements Visualizer<DataFrame> {
         sb.append("\n");
     }
 
-    private List<Integer> calculateColumnWidths(List<String> columnLabels) {
+    private List<Integer> calculateColumnWidths(List<Object> columnLabels) {
         List<Integer> columnWidths = new ArrayList<>();
 
-        for (String columnLabel : columnLabels) {
-            int maxWidth = columnLabel.length();
+        for (Object columnLabel : columnLabels) {
+            int maxWidth = columnLabel.toString().length();
             for (int i = 0; i < countRows(); i++) {
                 try {
                     int cellWidth = columns.get(columnLabels.indexOf(columnLabel)).getCell(i).getValue().toString()
@@ -303,25 +393,21 @@ class DataFrame implements Visualizer<DataFrame> {
         }
     }
 
-    public DataFrame filter(String columnName, Predicate<Object> condition){
-        try {
-            return manipulator.filter(columnName, condition);
-        } catch (LabelNotFound | InvalidShape | TypeDoesNotMatch | LabelAlreadyInUse | IndexOutOfBounds e) {
-            e.printStackTrace();
-            return null;
-        }
+    public DataFrame filter(Object label, Predicate<Object> condition)
+            throws LabelNotFound, InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
+        return manipulator.filter(label, condition);
     }
 
-    public void fillna(String column, Object value) throws TypeDoesNotMatch, IndexOutOfBounds {
-        try {
-            manipulator.fillna(column, value);
-        } catch (LabelNotFound e) {
-            e.printStackTrace();
-        }
+    public void fillna(Object label, Object value) throws LabelNotFound, TypeDoesNotMatch, IndexOutOfBounds {
+        manipulator.fillna(label, value);
     }
 
-    public Map<String, List<Row>> getGroupByData(String label) {
-        // TODO Volar a la mierda (?)
-        throw new UnsupportedOperationException("Unimplemented method 'getGroupByData'");
+    public DataFrame sample(double frac) throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
+        return manipulator.sample(frac);
+    }
+
+    public DataFrame sortBy(List<Object> labels, boolean descending)
+            throws LabelNotFound, InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
+        return manipulator.sortBy(labels, descending);
     }
 }
