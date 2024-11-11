@@ -29,32 +29,54 @@ public class DataFrame implements Visualizer<DataFrame> {
         this.groupedDataFrame = new GroupedDataFrame(this);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public DataFrame(List<List<?>> rows, List<?> headers) throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
+    public DataFrame(List<?> rows, List<?> headers) throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
         this.columns = new ArrayList<>();
         this.rows = new ArrayList<>();
         this.exporter = new DataExporter(this);
         this.manipulator = new DataManipulator(this);
         this.groupedDataFrame = new GroupedDataFrame(this);
 
-        for (List<?> row : rows) {
-            if (row.size() != headers.size()) {
-                throw new InvalidShape();
-            }
-        }
-
-        for (int i = 0; i < headers.size(); i++) {
-            Column<?> column = new Column<>(headers.get(i).toString());
-            for (List<?> row : rows) {
-                column.addCell(new Cell(row.get(i)));
-            }
-            columns.add(column);
+        if (!rows.isEmpty() && rows.get(0) instanceof Row || rows.get(0) instanceof List<?>) {
+            initializeColumnsFromData(rows, headers);
         }
 
         initializeRowsWithCells(columns);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void initializeColumnsFromData(List<?> rows, List<?> headers) throws InvalidShape, TypeDoesNotMatch {
+        if (rows.get(0) instanceof Row) {
+            for (Row row : (List<Row>) rows) {
+                if (row.size() != headers.size()) {
+                    throw new InvalidShape();
+                }
+            }
+        }
+
+        if (rows.get(0) instanceof List<?>) {
+            for (List<?> row : (List<List<?>>) rows) {
+                if (row.size() != headers.size()) {
+                    throw new InvalidShape();
+                }
+            }
+        }
+
+        for (int i = 0; i < headers.size(); i++) {
+            Column<?> column = new Column<>(headers.get(i).toString());
+            if (rows.get(0) instanceof Row) {
+                for (Row row : (List<Row>) rows) {
+                    column.addCell(new Cell(row.getCell(i).getValue()));
+                }
+            }
+            if (rows.get(0) instanceof List<?>) {
+                for (List<?> row : (List<List<?>>) rows) {
+                    column.addCell(new Cell(row.get(i)));
+                }
+            }
+            columns.add(column);
+        }
+    }
+
     public DataFrame(List<?> rows) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
         this.columns = new ArrayList<>();
         this.rows = new ArrayList<>();
@@ -62,31 +84,24 @@ public class DataFrame implements Visualizer<DataFrame> {
         this.manipulator = new DataManipulator(this);
         this.groupedDataFrame = new GroupedDataFrame(this);
 
-        if (rows.get(0) instanceof Column) {
-            this.columns = (List<Column<?>>) rows;
+        if (!rows.isEmpty() && rows.get(0) instanceof Row) {
+            List<String> headers = new ArrayList<>();
+
+            for (int i = 0; i < ((Row) rows.get(0)).size(); i++) {
+                headers.add("Column " + i);
+            }
+
+            initializeColumnsFromData(rows, headers);
         }
 
         if (rows.get(0) instanceof List<?>) {
-
             List<String> headers = new ArrayList<>();
 
             for (int i = 0; i < ((List<?>) rows.get(0)).size(); i++) {
                 headers.add("Column " + i);
             }
 
-            for (List<?> row : (List<List<?>>) rows) {
-                if (row.size() != headers.size()) {
-                    throw new InvalidShape();
-                }
-            }
-
-            for (int i = 0; i < headers.size(); i++) {
-                Column<?> column = new Column<>(headers.get(i).toString());
-                for (List<?> row : (List<List<?>>) rows) {
-                    column.addCell(new Cell(row.get(i)));
-                }
-                columns.add(column);
-            }
+            initializeColumnsFromData(rows, headers);
         }
 
         initializeRowsWithCells(columns);
@@ -222,10 +237,6 @@ public class DataFrame implements Visualizer<DataFrame> {
             copiedColumns.add(columns.get(i).copy());
         }
         return new DataFrame(copiedColumns);
-    }
-
-    public DataFrame slice(int start, int end) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
-        return new DataFrame(columns.subList(start, end));
     }
 
     public DataFrame head(int n) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
@@ -409,5 +420,10 @@ public class DataFrame implements Visualizer<DataFrame> {
     public DataFrame sortBy(List<Object> labels, boolean descending)
             throws LabelNotFound, InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
         return manipulator.sortBy(labels, descending);
+    }
+
+    public DataFrame slice(int start, int end)
+            throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
+        return manipulator.slice(start, end);
     }
 }

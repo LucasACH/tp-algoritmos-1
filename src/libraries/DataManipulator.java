@@ -1,8 +1,10 @@
 package libraries;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -15,6 +17,7 @@ import exceptions.TypeDoesNotMatch;
 import structures.Cell;
 import structures.Column;
 import structures.DataFrame;
+import structures.GroupedDataFrame;
 import structures.Row;
 
 public class DataManipulator {
@@ -127,39 +130,29 @@ public class DataManipulator {
         return new DataFrame(sampleRows, this.df.getColumnLabels());
     }
 
-    // public GroupedDataFrame groupBy(List<String> columns) throws LabelNotFound {
-    // // Validar que las columnas especificadas existan en el DataFrame
-    // List<String> columnLabels = this.df.getColumnLabels();
-    // List<Integer> columnIndices = new ArrayList<>();
-    // for (String column : columns) {
-    // int index = columnLabels.indexOf(column);
-    // if (index == -1) {
-    // throw new LabelNotFound("");
-    // }
-    // columnIndices.add(index); // Guardar los índices de las columnas para usarlos
-    // en la agrupación
-    // }
+    public DataFrame slice(int start, int end)
+            throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
+        return new DataFrame(this.df.getColumns().subList(start, end));
+    }
 
-    // // Crear el Map para almacenar los grupos
-    // Map<String, List<Row>> groupedData = new HashMap<>();
+    public GroupedDataFrame groupBy(List<Object> labels) throws LabelNotFound, IndexOutOfBounds {
+        Map<String, List<Row>> rows = new HashMap<String, List<Row>>();
 
-    // // Iterar sobre las filas del DataFrame para agruparlas
-    // for (Row row : this.df.getRows()) {
-    // // Crear la clave combinada para las columnas seleccionadas
-    // StringBuilder keyBuilder = new StringBuilder();
-    // for (int i = 0; i < columnIndices.size(); i++) {
-    // Cell<?> cell = row.getCell(columnIndices.get(i));
-    // keyBuilder.append(cell.getValue()); // Añadir el valor de la celda a la clave
-    // if (i < columnIndices.size() - 1) {
-    // keyBuilder.append("%"); // Separador entre valores de las columnas
-    // }
-    // }
-    // String key = keyBuilder.toString();
+        for (Row row : this.df.getRows()) {
+            StringBuilder groupName = new StringBuilder();
+            for (Object label : labels) {
+                int index = this.df.getColumnLabels().indexOf(label);
+                groupName.append(row.getCell(index).getValue()).append("_");
+            }
 
-    // // Agregar la fila al grupo correspondiente en el Map
-    // groupedData.computeIfAbsent(key, k -> new ArrayList<>()).add(row);
-    // }
+            String group = groupName.substring(0, groupName.length() - 1);
 
-    // return new GroupedDataFrame(this.df, groupedData);
-    // }
+            if (!rows.containsKey(group)) {
+                rows.put(group, new ArrayList<Row>());
+            }
+            rows.get(group).add(row);
+        }
+
+        return new GroupedDataFrame(this.df, rows);
+    }
 }

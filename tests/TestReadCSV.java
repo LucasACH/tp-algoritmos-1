@@ -17,12 +17,14 @@ public class TestReadCSV {
         df.fillna("City", "N/A");
         assert df.getCell(6, 3).equals("N/A");
 
-        df.filter("Age", (value) -> (int) value > 30);
+        // df.filter("Age", (value) -> (int) value > 30);
 
-        df.sortBy(Arrays.asList(
-                "Age", "Salary"), true).show();
+        // df.sortBy(Arrays.asList(
+        // "Age", "Salary"), true).show();
 
-        df.show();
+        System.out.println(df.manipulator.groupBy(Arrays.asList("City")).var("Salary"));
+
+        // df.show();
 
     }
 }

@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import exceptions.IndexOutOfBounds;
+import exceptions.InvalidShape;
 import exceptions.LabelNotFound;
+import exceptions.TypeDoesNotMatch;
 
-class GroupedDataFrame {
+public class GroupedDataFrame {
     private final DataFrame df;
     private final Map<String, List<Row>> groupedData;
 
@@ -21,11 +23,15 @@ class GroupedDataFrame {
         this.groupedData = groupedData;
     }
 
-    public Map<String, Double> sum(String label) throws LabelNotFound, IndexOutOfBounds {
-        Map<String, Double> results = new HashMap<>();
+    public void show() {
+        System.out.println(this);
+    }
+
+    public Map<Object, Double> sum(Object label) throws LabelNotFound, IndexOutOfBounds {
+        Map<Object, Double> results = new HashMap<>();
         int columnIndex = df.getColumnLabels().indexOf(label);
 
-        for (Map.Entry<String, List<Row>> entry : this.groupedData.entrySet()) {
+        for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
             String groupKey = entry.getKey();
             List<Row> rows = entry.getValue();
             double sum = 0;
@@ -41,8 +47,8 @@ class GroupedDataFrame {
         return results;
     }
 
-    public Map<String, Double> mean(String label) throws LabelNotFound, IndexOutOfBounds {
-        Map<String, Double> results = new HashMap<>();
+    public Map<Object, Double> mean(Object label) throws LabelNotFound, IndexOutOfBounds {
+        Map<Object, Double> results = new HashMap<>();
         int columnIndex = df.getColumnLabels().indexOf(label);
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
@@ -63,8 +69,8 @@ class GroupedDataFrame {
         return results;
     }
 
-    public Map<String, Double> min(String label) throws LabelNotFound, IndexOutOfBounds {
-        Map<String, Double> results = new HashMap<>();
+    public Map<Object, Double> min(Object label) throws LabelNotFound, IndexOutOfBounds {
+        Map<Object, Double> results = new HashMap<>();
         int columnIndex = df.getColumnLabels().indexOf(label);
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
@@ -83,8 +89,8 @@ class GroupedDataFrame {
         return results;
     }
 
-    public Map<String, Double> max(String label) throws LabelNotFound, IndexOutOfBounds {
-        Map<String, Double> results = new HashMap<>();
+    public Map<Object, Double> max(Object label) throws LabelNotFound, IndexOutOfBounds {
+        Map<Object, Double> results = new HashMap<>();
         int columnIndex = df.getColumnLabels().indexOf(label);
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
@@ -103,8 +109,8 @@ class GroupedDataFrame {
         return results;
     }
 
-    public Map<String, Integer> count(String label) throws LabelNotFound, IndexOutOfBounds {
-        Map<String, Integer> results = new HashMap<>();
+    public Map<Object, Integer> count(Object label) throws LabelNotFound, IndexOutOfBounds {
+        Map<Object, Integer> results = new HashMap<>();
         int columnIndex = df.getColumnLabels().indexOf(label);
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
@@ -123,8 +129,8 @@ class GroupedDataFrame {
         return results;
     }
 
-    public Map<String, Double> std(String label) throws LabelNotFound, IndexOutOfBounds {
-        Map<String, Double> results = new HashMap<>();
+    public Map<Object, Double> std(Object label) throws LabelNotFound, IndexOutOfBounds {
+        Map<Object, Double> results = new HashMap<>();
         int columnIndex = df.getColumnLabels().indexOf(label);
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
@@ -145,14 +151,14 @@ class GroupedDataFrame {
             }
 
             double mean = sum / count;
-            double stdDev = Math.sqrt((sumSquared / count) - (mean * mean));
-            results.put(groupKey, stdDev);
+            double variance = (sumSquared / count) - (mean * mean);
+            results.put(groupKey, Math.sqrt(variance));
         }
         return results;
     }
 
-    public Map<String, Double> var(String label) throws LabelNotFound, IndexOutOfBounds {
-        Map<String, Double> results = new HashMap<>();
+    public Map<Object, Double> var(Object label) throws LabelNotFound, IndexOutOfBounds {
+        Map<Object, Double> results = new HashMap<>();
         int columnIndex = df.getColumnLabels().indexOf(label);
 
         for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
@@ -177,5 +183,19 @@ class GroupedDataFrame {
             results.put(groupKey, variance);
         }
         return results;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, List<Row>> entry : groupedData.entrySet()) {
+            sb.append(entry.getKey()).append("\n");
+            try {
+                sb.append(new DataFrame(entry.getValue(), this.df.getColumnLabels()).toString()).append("\n");
+            } catch (IndexOutOfBounds | InvalidShape | TypeDoesNotMatch e) {
+                e.printStackTrace();
+            }
+        }
+        return sb.toString();
     }
 }
