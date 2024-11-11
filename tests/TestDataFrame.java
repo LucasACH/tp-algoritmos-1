@@ -6,6 +6,11 @@ import exceptions.TypeDoesNotMatch;
 import structures.DataFrame;
 
 public class TestDataFrame {
+
+    /**
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         List<List<?>> rows = Arrays.asList(
                 Arrays.asList("Alice", 23, "New York", "Engineer", 70000),

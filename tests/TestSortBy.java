@@ -5,6 +5,11 @@ import libraries.DataImporter;
 import structures.DataFrame;
 
 public class TestSortBy {
+
+    /**
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         DataFrame df = DataImporter.readCSV("data/dummy.csv");
         // df.show();
@@ -23,12 +28,5 @@ public class TestSortBy {
         DataFrame df3 = df2.sample(0.5);
         System.out.println("Sampled DataFrame:");
         df3.show();
-
-        // Column columna = df.getColumn("Name");
-        // System.out.println(columna);
-        // columna.sort(true);
-        // System.out.println(columna);
-        // columna.sort(false);
-        // System.out.println(columna);
     }
 }

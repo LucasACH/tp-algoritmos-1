@@ -1,8 +1,16 @@
+import java.util.Map;
+import java.util.function.Predicate;
+
 import exceptions.TypeDoesNotMatch;
 import libraries.DataImporter;
 import structures.DataFrame;
 
 public class TestReadCSV {
+
+    /**
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         DataFrame df = DataImporter.readCSV("data/dummy.csv");
 
@@ -15,6 +23,9 @@ public class TestReadCSV {
         df.fillna("City", "N/A");
         assert df.getCell(6, 3).equals("N/A");
 
-        assert df.filter("Age", (value) -> (int) value > 30).countRows() == 2;
+        Map<Object, Predicate<Object>> conditions = Map.of(
+                "Age", (value) -> (int) value > 30,
+                "Name", (value) -> ((String) value).startsWith("J"));
+        assert df.filter(conditions).getRows().size() == 2;
     }
 }

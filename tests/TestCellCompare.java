@@ -1,6 +1,10 @@
 import structures.Cell;
 
 public class TestCellCompare {
+
+    /**
+     * @param args
+     */
     public static void main(String[] args) {
         // Test con Integer (Comparable)
         Cell<Integer> cell1 = new Cell<>(10);

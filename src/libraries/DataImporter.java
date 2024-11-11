@@ -12,8 +12,25 @@ import exceptions.LabelAlreadyInUse;
 import exceptions.TypeDoesNotMatch;
 import structures.DataFrame;
 
+/**
+ * La clase DataImporter proporciona métodos para importar datos de archivos CSV
+ * y JSON a un DataFrame.
+ */
 public class DataImporter {
 
+    /**
+     * Lee un archivo CSV y devuelve un DataFrame con los datos.
+     *
+     * @param path Ruta del archivo CSV.
+     * @return Un DataFrame con los datos del archivo CSV.
+     * @throws IOException       Si ocurre un error de entrada/salida.
+     * @throws InvalidShape      Si el archivo CSV tiene un formato inválido.
+     * @throws TypeDoesNotMatch  Si el tipo de dato de una celda no coincide con el
+     *                           tipo de la columna.
+     * @throws LabelAlreadyInUse Si una etiqueta ya está en uso.
+     * @throws IndexOutOfBounds  Si se intenta acceder a un índice fuera de los
+     *                           límites.
+     */
     public static DataFrame readCSV(String path)
             throws IOException, InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
@@ -23,6 +40,10 @@ public class DataImporter {
         }
     }
 
+    /**
+     * @param headerLine
+     * @return List<String>
+     */
     private static List<String> parseHeaders(String headerLine) {
         List<String> headers = new ArrayList<>();
         for (String header : headerLine.split(",")) {
@@ -56,6 +77,19 @@ public class DataImporter {
         return value;
     }
 
+    /**
+     * Lee un archivo JSON y devuelve un DataFrame con los datos.
+     *
+     * @param path Ruta del archivo JSON.
+     * @return Un DataFrame con los datos del archivo JSON.
+     * @throws IOException       Si ocurre un error de entrada/salida.
+     * @throws InvalidShape      Si el archivo JSON tiene un formato inválido.
+     * @throws TypeDoesNotMatch  Si el tipo de dato de una celda no coincide con el
+     *                           tipo de la columna.
+     * @throws LabelAlreadyInUse Si una etiqueta ya está en uso.
+     * @throws IndexOutOfBounds  Si se intenta acceder a un índice fuera de los
+     *                           límites.
+     */
     public static DataFrame readJSON(String path)
             throws IOException, InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {

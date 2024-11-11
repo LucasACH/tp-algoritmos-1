@@ -6,6 +6,11 @@ import libraries.DataImporter;
 import structures.DataFrame;
 
 public class TestFilter {
+
+    /**
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
         // Crear un DataFrame
         DataFrame df = DataImporter.readCSV("data/dummy.csv");
@@ -15,13 +20,6 @@ public class TestFilter {
         conditions.put("Salary", value -> (Integer) value > 70000);
 
         DataFrame filteredDf = df.filter(conditions);
-
-        // Filtrar las filas del DataFrame
-        DataFrame dfFiltered = df.filter("Age", (value) -> (int) value > 30);
-
-        // Imprimir el DataFrame filtrado v1
-        System.out.println("DataFrame filtrado v1:");
-        System.out.println(dfFiltered);
 
         // Imprimir el DataFrame filtrado v2
         System.out.println("DataFrame filtrado v2:");
