@@ -1,4 +1,5 @@
 import libraries.DataImporter;
+import structures.DataFrame;
 
 public class TestFilter {
     public static void main(String[] args) throws Exception {

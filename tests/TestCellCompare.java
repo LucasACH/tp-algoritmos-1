@@ -1,3 +1,5 @@
+import structures.Cell;
+
 public class TestCellCompare {
     public static void main(String[] args) {
         // Test con Integer (Comparable)
@@ -29,7 +31,11 @@ public class TestCellCompare {
         // Comparable)
         Cell<Object> cell11 = new Cell<>(new Object());
         Cell<Object> cell12 = new Cell<>(new Object());
-        System.out.println("Comparando Object: " + cell11.compareTo(cell12)); // Debería lanzar
-                                                                              // UnsupportedOperationException
+
+        try {
+            System.out.println("Comparando Object: " + cell11.compareTo(cell12));
+        } catch (Exception e) {
+            assert UnsupportedOperationException.class.isInstance(e);
+        }
     }
 }

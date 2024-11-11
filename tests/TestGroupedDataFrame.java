@@ -1,14 +1,14 @@
 import java.util.Arrays;
-import java.util.List;
 
 import libraries.DataImporter;
+import structures.DataFrame;
+import structures.GroupedDataFrame;
 
 public class TestGroupedDataFrame {
     public static void main(String[] args) throws Exception {
         DataFrame df = DataImporter.readCSV("data/dummy.csv");
-        List<String> labels = Arrays.asList("Age");
 
-        GroupedDataFrame gdf = df.manipulator.groupBy(labels);
+        GroupedDataFrame gdf = df.groupBy(Arrays.asList("Age"));
 
         System.out.println(gdf.sum("Age"));
     }

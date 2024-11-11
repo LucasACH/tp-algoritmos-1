@@ -17,16 +17,14 @@ import libraries.DataManipulator;
 public class DataFrame implements Visualizer<DataFrame> {
     private List<Column<?>> columns;
     private List<Row> rows;
-    public final DataManipulator manipulator;
-    public final DataExporter exporter;
-    public final GroupedDataFrame groupedDataFrame;
+    private final DataManipulator manipulator;
+    private final DataExporter exporter;
 
     public DataFrame() {
         this.columns = new ArrayList<>();
         this.rows = new ArrayList<>();
         this.exporter = new DataExporter(this);
         this.manipulator = new DataManipulator(this);
-        this.groupedDataFrame = new GroupedDataFrame(this);
     }
 
     public DataFrame(List<?> rows, List<?> headers) throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
@@ -34,7 +32,6 @@ public class DataFrame implements Visualizer<DataFrame> {
         this.rows = new ArrayList<>();
         this.exporter = new DataExporter(this);
         this.manipulator = new DataManipulator(this);
-        this.groupedDataFrame = new GroupedDataFrame(this);
 
         if (!rows.isEmpty() && rows.get(0) instanceof Row || rows.get(0) instanceof List<?>) {
             initializeColumnsFromData(rows, headers);
@@ -82,7 +79,6 @@ public class DataFrame implements Visualizer<DataFrame> {
         this.rows = new ArrayList<>();
         this.exporter = new DataExporter(this);
         this.manipulator = new DataManipulator(this);
-        this.groupedDataFrame = new GroupedDataFrame(this);
 
         if (!rows.isEmpty() && rows.get(0) instanceof Row) {
             List<String> headers = new ArrayList<>();
@@ -425,5 +421,9 @@ public class DataFrame implements Visualizer<DataFrame> {
     public DataFrame slice(int start, int end)
             throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
         return manipulator.slice(start, end);
+    }
+
+    public GroupedDataFrame groupBy(List<Object> label) throws LabelNotFound, IndexOutOfBounds {
+        return manipulator.groupBy(label);
     }
 }

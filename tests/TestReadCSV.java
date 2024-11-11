@@ -1,5 +1,3 @@
-import java.util.Arrays;
-
 import exceptions.TypeDoesNotMatch;
 import libraries.DataImporter;
 import structures.DataFrame;
@@ -17,14 +15,6 @@ public class TestReadCSV {
         df.fillna("City", "N/A");
         assert df.getCell(6, 3).equals("N/A");
 
-        // df.filter("Age", (value) -> (int) value > 30);
-
-        // df.sortBy(Arrays.asList(
-        // "Age", "Salary"), true).show();
-
-        System.out.println(df.manipulator.groupBy(Arrays.asList("City")).var("Salary"));
-
-        // df.show();
-
+        assert df.filter("Age", (value) -> (int) value > 30).countRows() == 2;
     }
 }
