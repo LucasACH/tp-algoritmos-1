@@ -28,7 +28,7 @@ public class DataManipulator {
     }
 
     @SuppressWarnings("unchecked")
-    public DataFrame sortBy(List<Object> labels, boolean descending)
+    public DataFrame sortBy(List<? extends Object> labels, boolean descending)
             throws LabelNotFound, InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
 
         if (!this.df.getColumnLabels().containsAll(labels)) {
@@ -104,6 +104,44 @@ public class DataManipulator {
         return new DataFrame(rows, this.df.getColumnLabels());
     }
 
+    public DataFrame filter(Map<Object, Predicate<Object>> conditions) throws LabelNotFound, InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
+        List<Integer> indices = new ArrayList<>();
+        for (Object label : conditions.keySet()) {
+            int index = this.df.getColumnLabels().indexOf(label);
+            if (index == -1) {
+                throw new LabelNotFound("Label not found: " + label);
+            }
+            indices.add(index);
+        }
+
+        List<List<?>> rows = new ArrayList<>();
+        for (Row row : this.df.getRows()) {
+            boolean match = true;
+            
+            for (int i = 0; i < indices.size(); i++) {
+                int index = indices.get(i);
+                Object label = conditions.keySet().toArray()[i];
+                Predicate<Object> condition = conditions.get(label);
+
+                if (!condition.test(row.getCell(index).getValue())) {
+                    match = false;
+                    break;
+                }
+            }
+
+            if (match) {
+                List<Object> cells = new ArrayList<>();
+                for (Cell<?> cell : row.getCells()) {
+                    cells.add(cell.getValue());
+                }
+                rows.add(cells);
+            }
+        }
+
+        return new DataFrame(rows, this.df.getColumnLabels());
+    }
+
+
     public DataFrame sample(double frac) throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
         if (frac < 0 || frac > 1) {
             throw new IllegalArgumentException("Fraction must be between 0 and 1.");
@@ -135,7 +173,7 @@ public class DataManipulator {
         return new DataFrame(this.df.getColumns().subList(start, end));
     }
 
-    public GroupedDataFrame groupBy(List<Object> labels) throws LabelNotFound, IndexOutOfBounds {
+    public GroupedDataFrame groupBy(List<? extends Object> labels) throws LabelNotFound, IndexOutOfBounds {
         Map<String, List<Row>> rows = new HashMap<String, List<Row>>();
 
         for (Row row : this.df.getRows()) {

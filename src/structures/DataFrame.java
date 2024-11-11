@@ -3,6 +3,7 @@ package structures;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import exceptions.IndexOutOfBounds;
@@ -405,6 +406,11 @@ public class DataFrame implements Visualizer<DataFrame> {
         return manipulator.filter(label, condition);
     }
 
+    public DataFrame filter(Map<Object, Predicate<Object>> conditions)
+            throws LabelNotFound, InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
+        return manipulator.filter(conditions);
+    }
+    
     public void fillna(Object label, Object value) throws LabelNotFound, TypeDoesNotMatch, IndexOutOfBounds {
         manipulator.fillna(label, value);
     }

@@ -3,6 +3,7 @@ package libraries;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import structures.DataFrame;
 import structures.Row;
@@ -22,7 +23,7 @@ public class DataExporter {
     }
 
     private static void writeCSVHeaders(List<Object> headers, FileWriter writer) throws IOException {
-        writer.write(String.join(",", headers.stream().map(Object::toString).toList()));
+        writer.write(String.join(",", headers.stream().map(Object::toString).collect(Collectors.toList())));
         writer.write("\n");
     }
 
