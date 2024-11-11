@@ -1,6 +1,6 @@
 # **TP - Algoritmos y Estructura de Datos I**
 
-![class-diagram](/class-diagram.png "Class Diagram")
+![class-diagram](/class-diagram.jpg "Class Diagram")
 
 Se desea construir una librería que permita **manipular** y **analizar**
 **datos** en forma tabular (2 dimensiones) para el lenguaje Java. Deberá
