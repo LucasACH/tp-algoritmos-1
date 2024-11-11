@@ -3,6 +3,7 @@ package structures;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import exceptions.IndexOutOfBounds;
@@ -14,12 +15,23 @@ import interfaces.Visualizer;
 import libraries.DataExporter;
 import libraries.DataManipulator;
 
+/**
+ * Representa un marco de datos (DataFrame) que organiza datos en filas y
+ * columnas.
+ * Permite manipulación y exportación de datos, así como visualización en
+ * formato tabular.
+ * Este marco de datos utiliza filas y columnas dinámicas para almacenar
+ * diferentes tipos de datos.
+ */
 public class DataFrame implements Visualizer<DataFrame> {
     private List<Column<?>> columns;
     private List<Row> rows;
     private final DataManipulator manipulator;
     private final DataExporter exporter;
 
+    /**
+     * Crea una instancia vacía de DataFrame.
+     */
     public DataFrame() {
         this.columns = new ArrayList<>();
         this.rows = new ArrayList<>();
@@ -27,6 +39,17 @@ public class DataFrame implements Visualizer<DataFrame> {
         this.manipulator = new DataManipulator(this);
     }
 
+    /**
+     * Crea una instancia de DataFrame con las filas y encabezados proporcionados.
+     *
+     * @param rows    lista de filas que representan los datos iniciales.
+     * @param headers lista de encabezados de columna.
+     * @throws InvalidShape     si las dimensiones de filas y encabezados no
+     *                          coinciden.
+     * @throws TypeDoesNotMatch si el tipo de datos en una celda no coincide con el
+     *                          esperado.
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     */
     public DataFrame(List<?> rows, List<?> headers) throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
         this.columns = new ArrayList<>();
         this.rows = new ArrayList<>();
@@ -40,6 +63,16 @@ public class DataFrame implements Visualizer<DataFrame> {
         initializeRowsWithCells(columns);
     }
 
+    /**
+     * Inicializa las columnas utilizando las filas y encabezados proporcionados.
+     *
+     * @param rows    lista de filas que contienen datos.
+     * @param headers lista de encabezados de columna.
+     * @throws InvalidShape     si las filas no coinciden en tamaño con los
+     *                          encabezados.
+     * @throws TypeDoesNotMatch si los tipos de datos de las celdas no son
+     *                          consistentes.
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void initializeColumnsFromData(List<?> rows, List<?> headers) throws InvalidShape, TypeDoesNotMatch {
         if (rows.get(0) instanceof Row) {
@@ -103,6 +136,12 @@ public class DataFrame implements Visualizer<DataFrame> {
         initializeRowsWithCells(columns);
     }
 
+    /**
+     * Inicializa las filas utilizando las celdas de las columnas.
+     *
+     * @param columns columnas que contienen datos para formar las filas.
+     * @throws IndexOutOfBounds si el índice de una columna excede los límites.
+     */
     private void initializeRowsWithCells(List<Column<?>> columns) throws IndexOutOfBounds {
         for (int i = 0; i < countRows(); i++) {
             List<Cell<?>> cells = new ArrayList<>();
@@ -117,6 +156,16 @@ public class DataFrame implements Visualizer<DataFrame> {
         CSV, JSON
     }
 
+    /**
+     * Inserta una nueva fila en el DataFrame.
+     *
+     * @param row datos de la fila a insertar.
+     * @return la instancia del DataFrame.
+     * @throws InvalidShape      si la forma de la fila no coincide con el marco de
+     *                           datos.
+     * @throws TypeDoesNotMatch  si los tipos de las celdas no coinciden.
+     * @throws LabelAlreadyInUse si la etiqueta de la fila ya está en uso.
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public DataFrame insertRow(List<?> row) throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
         if (row.get(0) instanceof Cell) {
@@ -131,12 +180,17 @@ public class DataFrame implements Visualizer<DataFrame> {
         return this;
     }
 
-    public DataFrame insertRow(Object label, List<Cell<?>> cells)
-            throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
-        insertCells(label, cells);
-        return this;
-    }
-
+    /**
+     * Inserta una nueva fila en el DataFrame con la etiqueta proporcionada.
+     *
+     * @param label etiqueta de la fila.
+     * @param row   datos de la fila a insertar.
+     * @return la instancia del DataFrame.
+     * @throws InvalidShape      si la forma de la fila no coincide con el marco de
+     *                           datos.
+     * @throws TypeDoesNotMatch  si los tipos de las celdas no coinciden.
+     * @throws LabelAlreadyInUse si la etiqueta de la fila ya está en uso.
+     */
     private void insertCells(Object label, List<Cell<?>> cells)
             throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
         assignCellsToColumns(cells);
@@ -150,6 +204,16 @@ public class DataFrame implements Visualizer<DataFrame> {
         rows.add(new Row(label, cells));
     }
 
+    /**
+     * Asigna las celdas a las columnas correspondientes.
+     *
+     * @param cells lista de celdas a asignar.
+     * @throws InvalidShape     si la forma de las celdas no coincide con el número
+     *                          de
+     *                          columnas.
+     * @throws TypeDoesNotMatch si el tipo de datos de las celdas no coincide con el
+     *                          tipo de las columnas.
+     */
     @SuppressWarnings("unchecked")
     private void assignCellsToColumns(List<Cell<?>> cells) throws InvalidShape, TypeDoesNotMatch {
         validateShape(cells);
@@ -160,12 +224,29 @@ public class DataFrame implements Visualizer<DataFrame> {
 
     }
 
+    /**
+     * Inserta una nueva columna en el DataFrame.
+     *
+     * @param label etiqueta de la columna.
+     * @return la instancia del DataFrame.
+     * @throws InvalidShape     si la forma de la columna no es válida.
+     * @throws TypeDoesNotMatch si el tipo de datos de la columna no coincide.
+     */
     public DataFrame insertColumn(Object label) throws InvalidShape, TypeDoesNotMatch {
         Column<?> column = new Column<>(label);
         columns.add(column);
         return this;
     }
 
+    /**
+     * Inserta una nueva columna en el DataFrame con los datos proporcionados.
+     *
+     * @param label etiqueta de la columna.
+     * @param data  datos de la columna.
+     * @return la instancia del DataFrame.
+     * @throws InvalidShape     si la forma de la columna no es válida.
+     * @throws TypeDoesNotMatch si el tipo de datos de la columna no coincide.
+     */
     public DataFrame insertColumn(Object label, List<?> data) throws InvalidShape, TypeDoesNotMatch {
         validateColumnShape(data);
         Column<?> column = createColumnWithData(label, data);
@@ -173,6 +254,15 @@ public class DataFrame implements Visualizer<DataFrame> {
         return this;
     }
 
+    /**
+     * Crea una nueva columna con los datos proporcionados.
+     *
+     * @param label etiqueta de la columna.
+     * @param data  datos de la columna.
+     * @return la nueva columna creada.
+     * @throws TypeDoesNotMatch si el tipo de datos no coincide con el tipo de la
+     *                          columna.
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private Column<?> createColumnWithData(Object label, List<?> data) throws TypeDoesNotMatch {
         Column<?> column = new Column<>(label);
@@ -182,6 +272,14 @@ public class DataFrame implements Visualizer<DataFrame> {
         return column;
     }
 
+    /**
+     * Inserta una nueva columna en el DataFrame.
+     *
+     * @param data datos de la columna.
+     * @return la instancia del DataFrame.
+     * @throws InvalidShape     si la forma de la columna no es válida.
+     * @throws TypeDoesNotMatch si el tipo de datos de la columna no coincide.
+     */
     public DataFrame insertColumn(List<?> data) throws InvalidShape, TypeDoesNotMatch {
         validateColumnShape(data);
         Column<?> column = createColumnWithData("Column " + countColumns(), data);
@@ -189,19 +287,41 @@ public class DataFrame implements Visualizer<DataFrame> {
         return this;
     }
 
+    /**
+     * Obtiene el número de filas en el DataFrame.
+     *
+     * @return el número de filas.
+     */
     public DataFrame insertColumn(Column<?> column) throws InvalidShape {
         columns.add(column);
         return this;
     }
 
+    /**
+     * Obtiene el número de filas en el DataFrame.
+     *
+     * @return el número de filas.
+     */
     public int countRows() {
         return columns.isEmpty() ? 0 : columns.get(0).getCells().size();
     }
 
+    /**
+     * Obtiene el número de columnas en el DataFrame.
+     *
+     * @return el número de columnas.
+     */
     public int countColumns() {
         return columns.size();
     }
 
+    /**
+     * Obtiene una columna del DataFrame por su índice.
+     *
+     * @param index índice de la columna.
+     * @return la columna en el índice especificado.
+     * @throws IndexOutOfBounds si el índice está fuera de los límites.
+     */
     public Column<?> getColumn(Object label) throws LabelNotFound {
         return columns.stream()
                 .filter(column -> column.getLabel().equals(label))
@@ -209,6 +329,13 @@ public class DataFrame implements Visualizer<DataFrame> {
                 .orElseThrow(LabelNotFound::new);
     }
 
+    /**
+     * Obtiene una fila del DataFrame por su índice.
+     *
+     * @param index índice de la fila.
+     * @return la fila en el índice especificado.
+     * @throws IndexOutOfBounds si el índice está fuera de los límites.
+     */
     public Row getRow(int index) throws IndexOutOfBounds {
         if (!isValidRowIndex(index)) {
             throw new IndexOutOfBounds();
@@ -216,17 +343,45 @@ public class DataFrame implements Visualizer<DataFrame> {
         return rows.get(index);
     }
 
+    /**
+     * Obtiene una celda del DataFrame por su índice de fila y columna.
+     *
+     * @param rowIndex    índice de la fila.
+     * @param columnIndex índice de la columna.
+     * @return la celda en la fila y columna especificadas.
+     * @throws IndexOutOfBounds si los índices están fuera de los límites.
+     */
     public Cell<?> getCell(int rowIndex, int columnIndex) throws IndexOutOfBounds {
         validateIndices(rowIndex, columnIndex);
         return columns.get(columnIndex).getCell(rowIndex);
     }
 
+    /**
+     * Establece un nuevo valor en la celda especificada.
+     *
+     * @param rowIndex    índice de la fila.
+     * @param columnIndex índice de la columna.
+     * @param value       nuevo valor a establecer.
+     * @throws IndexOutOfBounds si los índices están fuera de los límites.
+     * @throws TypeDoesNotMatch si el tipo del nuevo valor no coincide con el tipo
+     *                          de
+     *                          la celda.
+     */
     @SuppressWarnings("unchecked")
     public <T> void setCell(int rowIndex, int columnIndex, T value) throws IndexOutOfBounds, TypeDoesNotMatch {
         validateIndices(rowIndex, columnIndex);
         ((Column<T>) columns.get(columnIndex)).setCell(rowIndex, value);
     }
 
+    /**
+     * Crea y devuelve una copia del DataFrame actual.
+     * 
+     * @return
+     * @throws InvalidShape
+     * @throws TypeDoesNotMatch
+     * @throws LabelAlreadyInUse
+     * @throws IndexOutOfBounds
+     */
     public DataFrame copy() throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
         List<Column<?>> copiedColumns = new ArrayList<>();
         for (int i = 0; i < countColumns(); i++) {
@@ -235,18 +390,52 @@ public class DataFrame implements Visualizer<DataFrame> {
         return new DataFrame(copiedColumns);
     }
 
+    /**
+     * Obtiene las primeras n filas del DataFrame.
+     *
+     * @param n número de filas a obtener.
+     * @return un nuevo DataFrame con las primeras n filas.
+     * @throws IndexOutOfBounds si el número de filas a obtener es mayor que el
+     *                          número de filas en el DataFrame.
+     * @throws InvalidShape     si las dimensiones del nuevo DataFrame no son
+     *                          válidas.
+     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
+     */
     public DataFrame head(int n) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
         return createSubDataFrame(0, n);
     }
 
+    /**
+     * Obtiene las últimas n filas del DataFrame.
+     *
+     * @param n número de filas a obtener.
+     * @return un nuevo DataFrame con las últimas n filas.
+     * @throws IndexOutOfBounds si el número de filas a obtener es mayor que el
+     *                          número de filas en el DataFrame.
+     * @throws InvalidShape     si las dimensiones del nuevo DataFrame no son
+     *                          válidas.
+     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
+     */
     public DataFrame tail(int n) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
         return createSubDataFrame(countRows() - n, countRows());
     }
 
+    /**
+     * Exporta los datos del DataFrame a un archivo CSV.
+     *
+     * @param path ruta del archivo CSV.
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     */
     public void exportToCSV(String path) throws IndexOutOfBounds {
         exportData(path, ExportFormat.CSV);
     }
 
+    /**
+     * Exporta los datos del DataFrame a un archivo JSON.
+     *
+     * @param path ruta del archivo JSON.
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     */
     public void exportToJSON(String path) throws IndexOutOfBounds {
         exportData(path, ExportFormat.JSON);
     }
@@ -265,14 +454,29 @@ public class DataFrame implements Visualizer<DataFrame> {
         System.out.println(this);
     }
 
+    /**
+     * Obtiene las columnas del DataFrame.
+     *
+     * @return lista de columnas.
+     */
     public List<Column<?>> getColumns() {
         return columns;
     }
 
+    /**
+     * Obtiene las filas del DataFrame.
+     *
+     * @return lista de filas.
+     */
     public List<Row> getRows() {
         return rows;
     }
 
+    /**
+     * Obtiene las etiquetas de las columnas del DataFrame.
+     *
+     * @return lista de etiquetas de columnas.
+     */
     public List<Object> getColumnLabels() {
         List<Object> labels = new ArrayList<>();
         for (Column<?> column : columns) {
@@ -281,12 +485,24 @@ public class DataFrame implements Visualizer<DataFrame> {
         return labels;
     }
 
+    /**
+     * Valida la forma de las celdas.
+     * 
+     * @param cells lista de celdas a validar.
+     * @throws InvalidShape si la forma de las celdas no es válida.
+     */
     private void validateShape(List<Cell<?>> cells) throws InvalidShape {
         if (cells.size() != columns.size()) {
             throw new InvalidShape();
         }
     }
 
+    /**
+     * Valida la forma de las columnas.
+     * 
+     * @param column lista de celdas a validar.
+     * @throws InvalidShape si la forma de las columnas no es válida.
+     */
     private void validateColumnShape(List<?> column) throws InvalidShape {
         if (column instanceof Column) {
             if (!columns.isEmpty() && ((Column<?>) column).getCells().size() != countRows()) {
@@ -299,16 +515,40 @@ public class DataFrame implements Visualizer<DataFrame> {
         }
     }
 
+    /**
+     * Verifica si el índice de fila es válido.
+     * 
+     * @param index índice de fila.
+     * @return true si el índice es válido, de lo contrario false.
+     */
     private boolean isValidRowIndex(int index) {
         return index >= 0 && index < countRows();
     }
 
+    /**
+     * Valida los índices de fila y columna.
+     * 
+     * @param rowIndex    índice de fila.
+     * @param columnIndex índice de columna.
+     * @throws IndexOutOfBounds si los índices están fuera de los límites.
+     */
     private void validateIndices(int rowIndex, int columnIndex) throws IndexOutOfBounds {
         if (!isValidRowIndex(rowIndex) || columnIndex < 0 || columnIndex >= countColumns()) {
             throw new IndexOutOfBounds();
         }
     }
 
+    /**
+     * Crea un nuevo DataFrame con las filas en el rango especificado.
+     * 
+     * @param start índice de la primera fila.
+     * @param end   índice de la última fila.
+     * @return un nuevo DataFrame con las filas en el rango especificado.
+     * @throws IndexOutOfBounds si los índices están fuera de los límites.
+     * @throws InvalidShape     si las dimensiones del nuevo DataFrame no son
+     *                          válidas.
+     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
+     */
     private DataFrame createSubDataFrame(int start, int end) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
         List<Column<?>> newColumns = new ArrayList<>();
         for (Column<?> column : this.getColumns()) {
@@ -322,6 +562,13 @@ public class DataFrame implements Visualizer<DataFrame> {
         return new DataFrame(newColumns);
     }
 
+    /**
+     * Exporta los datos del DataFrame a un archivo.
+     * 
+     * @param path   ruta del archivo.
+     * @param format formato de exportación.
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     */
     private void exportData(String path, ExportFormat format) throws IndexOutOfBounds {
         try {
             if (format == ExportFormat.CSV) {
@@ -334,6 +581,11 @@ public class DataFrame implements Visualizer<DataFrame> {
         }
     }
 
+    /**
+     * Añade las etiquetas de las columnas al StringBuilder.
+     * 
+     * @param sb StringBuilder para añadir las etiquetas.
+     */
     private void appendColumnHeaders(StringBuilder sb) {
         List<Object> columnLabels = getColumnLabels();
         List<Integer> columnWidths = calculateColumnWidths(columnLabels);
@@ -359,6 +611,13 @@ public class DataFrame implements Visualizer<DataFrame> {
         sb.append("\n");
     }
 
+    /**
+     * Calcula el ancho de las columnas basado en las etiquetas de las columnas y
+     * los valores de las celdas.
+     * 
+     * @param columnLabels lista de etiquetas de las columnas.
+     * @return lista de anchos de las columnas.
+     */
     private List<Integer> calculateColumnWidths(List<Object> columnLabels) {
         List<Integer> columnWidths = new ArrayList<>();
 
@@ -381,6 +640,11 @@ public class DataFrame implements Visualizer<DataFrame> {
         return columnWidths;
     }
 
+    /**
+     * Añade los datos de las filas al StringBuilder.
+     * 
+     * @param sb StringBuilder para añadir los datos de las filas.
+     */
     private void appendRowData(StringBuilder sb) {
         for (int i = 0; i < countRows(); i++) {
             sb.append("| ");
@@ -400,29 +664,91 @@ public class DataFrame implements Visualizer<DataFrame> {
         }
     }
 
-    public DataFrame filter(Object label, Predicate<Object> condition)
+    /**
+     * Filtra las filas del DataFrame basado en una o más condiciones.
+     * 
+     * @param conditions
+     * @return
+     * @throws LabelNotFound
+     * @throws InvalidShape
+     * @throws TypeDoesNotMatch
+     * @throws IndexOutOfBounds
+     */
+    public DataFrame filter(Map<Object, Predicate<Object>> conditions)
             throws LabelNotFound, InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
-        return manipulator.filter(label, condition);
+        return manipulator.filter(conditions);
     }
 
+    /**
+     * Llena los valores nulos en una columna con un valor específico.
+     * 
+     * @param label etiqueta de la columna.
+     * @param value valor para reemplazar los valores nulos.
+     * @throws LabelNotFound    si la etiqueta de la columna no se encuentra.
+     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     */
     public void fillna(Object label, Object value) throws LabelNotFound, TypeDoesNotMatch, IndexOutOfBounds {
         manipulator.fillna(label, value);
     }
 
+    /**
+     * Devuelve una muestra aleatoria de filas del DataFrame.
+     * 
+     * @param frac fracción de filas a devolver.
+     * @return un nuevo DataFrame con una muestra aleatoria de filas.
+     * @throws InvalidShape      si las dimensiones del nuevo DataFrame no son
+     *                           válidas.
+     * @throws TypeDoesNotMatch  si los tipos de datos no coinciden.
+     * @throws LabelAlreadyInUse si la etiqueta de la fila ya está en uso.
+     * @throws IndexOutOfBounds  si hay índices fuera del rango permitido.
+     */
     public DataFrame sample(double frac) throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
         return manipulator.sample(frac);
     }
 
+    /**
+     * Ordena las filas del DataFrame basado en una o más columnas.
+     * 
+     * @param labels     lista de etiquetas de las columnas.
+     * @param descending true si se ordena de forma descendente, de lo contrario
+     *                   false.
+     * @return un nuevo DataFrame con las filas ordenadas.
+     * @throws LabelNotFound    si la etiqueta de la columna no se encuentra.
+     * @throws InvalidShape     si las dimensiones del nuevo DataFrame no son
+     *                          válidas.
+     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     */
     public DataFrame sortBy(List<Object> labels, boolean descending)
             throws LabelNotFound, InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
         return manipulator.sortBy(labels, descending);
     }
 
+    /**
+     * Devuelve un subconjunto de columnas del DataFrame.
+     * 
+     * @param labels lista de etiquetas de las columnas.
+     * @return un nuevo DataFrame con las columnas seleccionadas.
+     * @throws LabelNotFound    si la etiqueta de la columna no se encuentra.
+     * @throws InvalidShape     si las dimensiones del nuevo DataFrame no son
+     *                          válidas.
+     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     */
     public DataFrame slice(int start, int end)
             throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
         return manipulator.slice(start, end);
     }
 
+    /**
+     * Agrupa las filas del DataFrame basado en una o más columnas.
+     * 
+     * @param label lista de etiquetas de las columnas.
+     * @return un nuevo DataFrame agrupado.
+     * @throws LabelNotFound    si la etiqueta de la columna no se encuentra.
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     */
     public GroupedDataFrame groupBy(List<Object> label) throws LabelNotFound, IndexOutOfBounds {
         return manipulator.groupBy(label);
     }

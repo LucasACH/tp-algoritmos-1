@@ -7,13 +7,27 @@ import java.util.List;
 import structures.DataFrame;
 import structures.Row;
 
+/**
+ * Clase que permite exportar un DataFrame a un archivo CSV o JSON.
+ */
 public class DataExporter {
     private DataFrame df;
 
+    /**
+     * Constructor que inicializa el exportador con un DataFrame.
+     *
+     * @param df DataFrame a exportar.
+     */
     public DataExporter(DataFrame df) {
         this.df = df;
     }
 
+    /**
+     * Exporta el DataFrame a un archivo CSV en la ruta especificada.
+     *
+     * @param path Ruta del archivo CSV.
+     * @throws IOException Si ocurre un error de entrada/salida.
+     */
     public void toCSV(String path) throws IOException {
         try (FileWriter writer = new FileWriter(path)) {
             writeCSVHeaders(this.df.getColumnLabels(), writer);
@@ -37,6 +51,12 @@ public class DataExporter {
         }
     }
 
+    /**
+     * Exporta el DataFrame a un archivo JSON en la ruta especificada.
+     *
+     * @param path Ruta del archivo JSON.
+     * @throws IOException Si ocurre un error de entrada/salida.
+     */
     public void toJSON(String path) throws IOException {
         try (FileWriter writer = new FileWriter(path)) {
             writer.write("[\n");

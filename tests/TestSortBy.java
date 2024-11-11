@@ -23,12 +23,5 @@ public class TestSortBy {
         DataFrame df3 = df2.sample(0.5);
         System.out.println("Sampled DataFrame:");
         df3.show();
-
-        // Column columna = df.getColumn("Name");
-        // System.out.println(columna);
-        // columna.sort(true);
-        // System.out.println(columna);
-        // columna.sort(false);
-        // System.out.println(columna);
     }
 }

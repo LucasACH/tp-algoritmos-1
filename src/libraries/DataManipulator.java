@@ -20,13 +20,35 @@ import structures.DataFrame;
 import structures.GroupedDataFrame;
 import structures.Row;
 
+/**
+ * La clase DataManipulator proporciona métodos para manipular y transformar
+ */
 public class DataManipulator {
     private DataFrame df;
 
+    /**
+     * Constructor que inicializa la clase con un DataFrame.
+     *
+     * @param df DataFrame a manipular.
+     */
     public DataManipulator(DataFrame df) {
         this.df = df;
     }
 
+    /**
+     * Ordena el DataFrame por una lista de etiquetas.
+     * 
+     * @param labels     Lista de etiquetas por las que se ordenará el DataFrame.
+     * @param descending Indica si el orden es descendente.
+     * @return Un nuevo DataFrame ordenado.
+     * @throws LabelNotFound    Si alguna de las etiquetas no existe en el
+     *                          DataFrame.
+     * @throws InvalidShape     Si el DataFrame tiene una forma inválida.
+     * @throws TypeDoesNotMatch Si el tipo de dato de una celda no coincide con el
+     *                          tipo de la columna.
+     * @throws IndexOutOfBounds Si se intenta acceder a un índice fuera de los
+     *                          límites.
+     */
     @SuppressWarnings("unchecked")
     public DataFrame sortBy(List<Object> labels, boolean descending)
             throws LabelNotFound, InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
@@ -70,6 +92,17 @@ public class DataManipulator {
         return new DataFrame(rows, this.df.getColumnLabels());
     }
 
+    /**
+     * Rellena los valores faltantes en una columna con un valor específico.
+     * 
+     * @param label Etiqueta de la columna a rellenar.
+     * @param value Valor con el que se rellenarán los valores faltantes.
+     * @throws LabelNotFound    Si la etiqueta no existe en el DataFrame.
+     * @throws TypeDoesNotMatch Si el tipo de dato de la columna no coincide con el
+     *                          tipo del valor.
+     * @throws IndexOutOfBounds Si se intenta acceder a un índice fuera de los
+     *                          límites.
+     */
     @SuppressWarnings("unchecked")
     public <T> void fillna(Object label, T value) throws LabelNotFound, TypeDoesNotMatch, IndexOutOfBounds {
         Column<T> column = (Column<T>) this.df.getColumn(label);
@@ -80,30 +113,62 @@ public class DataManipulator {
         }
     }
 
-    public DataFrame filter(Object label, Predicate<Object> condition)
+    /**
+     * Filtra las filas del DataFrame basado en una o más condiciones.
+     * 
+     * @param conditions
+     * @return
+     * @throws LabelNotFound
+     * @throws InvalidShape
+     * @throws TypeDoesNotMatch
+     * @throws IndexOutOfBounds
+     */
+    public DataFrame filter(Map<Object, Predicate<Object>> conditions)
             throws LabelNotFound, InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
-
-        int index = this.df.getColumnLabels().indexOf(label);
-
-        if (index == -1) {
-            throw new LabelNotFound();
+        List<Integer> indices = new ArrayList<>();
+        for (Object label : conditions.keySet()) {
+            int index = this.df.getColumnLabels().indexOf(label);
+            if (index == -1) {
+                throw new LabelNotFound("Label not found: " + label);
+            }
+            indices.add(index);
         }
-
         List<List<?>> rows = new ArrayList<>();
-
         for (Row row : this.df.getRows()) {
-            List<Object> cells = new ArrayList<>();
-            if (condition.test(row.getCell(index).getValue())) {
+            boolean match = true;
+
+            for (int i = 0; i < indices.size(); i++) {
+                int index = indices.get(i);
+                Object label = conditions.keySet().toArray()[i];
+                Predicate<Object> condition = conditions.get(label);
+                if (!condition.test(row.getCell(index).getValue())) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                List<Object> cells = new ArrayList<>();
                 for (Cell<?> cell : row.getCells()) {
                     cells.add(cell.getValue());
                 }
                 rows.add(cells);
             }
         }
-
         return new DataFrame(rows, this.df.getColumnLabels());
     }
 
+    /**
+     * Muestra una muestra aleatoria de filas del DataFrame.
+     * 
+     * @param frac Fracción de filas a seleccionar.
+     * @return Un nuevo DataFrame con la muestra aleatoria.
+     * @throws InvalidShape      Si el DataFrame tiene una forma inválida.
+     * @throws TypeDoesNotMatch  Si el tipo de dato de una celda no coincide con el
+     *                           tipo de la columna.
+     * @throws LabelAlreadyInUse Si una etiqueta ya está en uso.
+     * @throws IndexOutOfBounds  Si se intenta acceder a un índice fuera de los
+     *                           límites.
+     */
     public DataFrame sample(double frac) throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
         if (frac < 0 || frac > 1) {
             throw new IllegalArgumentException("Fraction must be between 0 and 1.");
@@ -130,11 +195,30 @@ public class DataManipulator {
         return new DataFrame(sampleRows, this.df.getColumnLabels());
     }
 
+    /**
+     * Devuelve un subconjunto de columnas del DataFrame.
+     * 
+     * @param labels lista de etiquetas de las columnas.
+     * @return un nuevo DataFrame con las columnas seleccionadas.
+     * @throws LabelNotFound    si la etiqueta de la columna no se encuentra.
+     * @throws InvalidShape     si las dimensiones del nuevo DataFrame no son
+     *                          válidas.
+     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     */
     public DataFrame slice(int start, int end)
             throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
         return new DataFrame(this.df.getColumns().subList(start, end));
     }
 
+    /**
+     * Agrupa las filas del DataFrame basado en una o más columnas.
+     * 
+     * @param label lista de etiquetas de las columnas.
+     * @return un nuevo DataFrame agrupado.
+     * @throws LabelNotFound    si la etiqueta de la columna no se encuentra.
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     */
     public GroupedDataFrame groupBy(List<Object> labels) throws LabelNotFound, IndexOutOfBounds {
         Map<String, List<Row>> rows = new HashMap<String, List<Row>>();
 
