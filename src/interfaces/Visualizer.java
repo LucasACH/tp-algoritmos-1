@@ -5,7 +5,7 @@ import exceptions.InvalidShape;
 import exceptions.TypeDoesNotMatch;
 
 public interface Visualizer<T> {
-    public void show();
+    public void show() throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch;
 
     public T head(int n) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch;
 

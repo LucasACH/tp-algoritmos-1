@@ -458,8 +458,10 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
     }
 
     @Override
-    public void show() {
-        System.out.println(this);
+    public void show() throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
+        System.out.println(this.head(5));
+        System.out.println("...");
+        System.out.println(this.tail(5));
     }
 
     /**
