@@ -97,20 +97,25 @@ public class DataManipulator {
      * 
      * @param label Etiqueta de la columna a rellenar.
      * @param value Valor con el que se rellenarán los valores faltantes.
-     * @throws LabelNotFound    Si la etiqueta no existe en el DataFrame.
-     * @throws TypeDoesNotMatch Si el tipo de dato de la columna no coincide con el
-     *                          tipo del valor.
-     * @throws IndexOutOfBounds Si se intenta acceder a un índice fuera de los
-     *                          límites.
+     * @throws LabelNotFound     Si la etiqueta no existe en el DataFrame.
+     * @throws TypeDoesNotMatch  Si el tipo de dato de la columna no coincide con el
+     *                           tipo del valor.
+     * @throws IndexOutOfBounds  Si se intenta acceder a un índice fuera de los
+     *                           límites.
+     * @throws LabelAlreadyInUse
+     * @throws InvalidShape
      */
     @SuppressWarnings("unchecked")
-    public <T> void fillna(Object label, T value) throws LabelNotFound, TypeDoesNotMatch, IndexOutOfBounds {
-        Column<T> column = (Column<T>) this.df.getColumn(label);
+    public <T> DataFrame fillna(Object label, T value)
+            throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds, LabelNotFound {
+        DataFrame df = this.df.copy();
+        Column<T> column = (Column<T>) df.getColumn(label);
         for (Cell<T> cell : column.getCells()) {
             if (cell.isEmpty()) {
                 cell.setValue(value);
             }
         }
+        return df;
     }
 
     /**

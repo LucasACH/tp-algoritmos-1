@@ -111,12 +111,18 @@ public class DataImporter {
 
     private static List<List<?>> parseJSONRows(String jsonContent, List<String> headers) {
         List<List<?>> rows = new ArrayList<>();
+
+        if (jsonContent.length() <= 2) {
+            return rows;
+        }
+
         String[] jsonRows = jsonContent.substring(1, jsonContent.length() - 1).split("\\},\\{");
 
         for (String jsonRow : jsonRows) {
             List<Object> row = parseJSONRow(jsonRow, headers);
             rows.add(row);
         }
+
         return rows;
     }
 

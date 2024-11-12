@@ -2,11 +2,13 @@ package structures;
 
 import java.util.List;
 
+import interfaces.CopyableStructure;
+
 /**
  * La clase Row representa una fila que contiene una lista de celdas (Cell) y
  * una etiqueta.
  */
-public class Row {
+public class Row implements CopyableStructure<Row> {
     private Object label;
     private List<Cell<?>> cells;
 
@@ -75,6 +77,16 @@ public class Row {
      */
     public int size() {
         return cells.size();
+    }
+
+    /**
+     * Crea una copia de la fila actual.
+     *
+     * @return Una copia de la fila.
+     */
+    @Override
+    public Row copy() {
+        return new Row(label, cells);
     }
 
     /**

@@ -31,7 +31,7 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
     private final DataExporter exporter;
 
     /**
-     * Crea una instancia vacía de DataFrame.
+     * Crea un DataFrame vacío.
      */
     public DataFrame() {
         this.columns = new ArrayList<>();
@@ -41,99 +41,97 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
     }
 
     /**
-     * Crea una instancia de DataFrame con las filas y encabezados proporcionados.
+     * Crea un DataFrame con las columnas y encabezados proporcionados.
      *
      * @param rows    lista de filas que representan los datos iniciales.
      * @param headers lista de encabezados de columna.
-     * @throws InvalidShape     si las dimensiones de filas y encabezados no
-     *                          coinciden.
+     * @throws InvalidShape     si las dimensiones de las filas no coinciden con la
      * @throws TypeDoesNotMatch si el tipo de datos en una celda no coincide con el
-     *                          esperado.
-     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     *                          tipo esperado.
+     * @throws IndexOutOfBounds si los índices exceden el rango permitido.
      */
     public DataFrame(List<?> rows, List<?> headers) throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
-        this.columns = new ArrayList<>();
-        this.rows = new ArrayList<>();
-        this.exporter = new DataExporter(this);
-        this.manipulator = new DataManipulator(this);
-
-        if (!rows.isEmpty() && rows.get(0) instanceof Row || rows.get(0) instanceof List<?>) {
-            initializeColumnsFromData(rows, headers);
-        }
-
-        initializeRowsWithCells(columns);
+        this();
+        initializeDataFrame(rows, headers);
     }
 
     /**
-     * @param rows
-     * @param headers
-     * @throws InvalidShape
-     * @throws TypeDoesNotMatch
+     * Crea un DataFrame con las filas proporcionadas.
+     *
+     * @param rows lista de filas que representan los datos iniciales.
+     * @throws IndexOutOfBounds si los índices exceden el rango permitido.
+     * @throws InvalidShape     si las dimensiones de las filas no coinciden con la
+     * @throws TypeDoesNotMatch si el tipo de datos en una celda no coincide con el
+     *                          tipo esperado.
+     */
+    public DataFrame(List<?> rows) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
+        this();
+        List<String> headers = generateHeaders(rows);
+        initializeDataFrame(rows, headers);
+    }
+
+    /**
+     * Inicializa un DataFrame con las filas y encabezados proporcionados.
+     *
+     * @param rows    lista de filas que representan los datos iniciales.
+     * @param headers lista de encabezados de columna.
+     * @throws InvalidShape     si las dimensiones de las filas no coinciden con la
+     * @throws TypeDoesNotMatch si el tipo de datos en una celda no coincide con el
+     * @throws IndexOutOfBounds
+     */
+    private void initializeDataFrame(List<?> rows, List<?> headers)
+            throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
+        if (rows.isEmpty())
+            return;
+
+        validateRowShapes(rows, headers.size());
+        initializeColumns(rows, headers);
+        populateRowsWithCells(columns);
+    }
+
+    /**
+     * Valida que todas las filas tengan la misma forma que los encabezados.
+     *
+     * @param rows         lista de filas.
+     * @param expectedSize tamaño esperado de las filas.
+     * @throws InvalidShape si la forma de las filas no coincide con el tamaño
+     */
+    private void validateRowShapes(List<?> rows, int expectedSize) throws InvalidShape {
+        for (Object row : rows) {
+            int size = (row instanceof Row) ? ((Row) row).size() : ((List<?>) row).size();
+            if (size != expectedSize)
+                throw new InvalidShape();
+        }
+    }
+
+    /**
+     * Inicializa las columnas del DataFrame con los datos proporcionados.
+     *
+     * @param rows    lista de filas que representan los datos.
+     * @param headers lista de encabezados de columna.
+     * @throws TypeDoesNotMatch si los tipos de datos en las celdas no coinciden.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void initializeColumnsFromData(List<?> rows, List<?> headers) throws InvalidShape, TypeDoesNotMatch {
-        if (rows.get(0) instanceof Row) {
-            for (Row row : (List<Row>) rows) {
-                if (row.size() != headers.size()) {
-                    throw new InvalidShape();
-                }
-            }
-        }
-
-        if (rows.get(0) instanceof List<?>) {
-            for (List<?> row : (List<List<?>>) rows) {
-                if (row.size() != headers.size()) {
-                    throw new InvalidShape();
-                }
-            }
-        }
-
+    private void initializeColumns(List<?> rows, List<?> headers) throws TypeDoesNotMatch {
         for (int i = 0; i < headers.size(); i++) {
             Column<?> column = new Column<>(headers.get(i).toString());
-            if (rows.get(0) instanceof Row) {
-                for (Row row : (List<Row>) rows) {
-                    column.addCell(new Cell(row.getCell(i).getValue()));
-                }
-            }
-            if (rows.get(0) instanceof List<?>) {
-                for (List<?> row : (List<List<?>>) rows) {
-                    column.addCell(new Cell(row.get(i)));
-                }
+            for (Object row : rows) {
+                Object cellValue = (row instanceof Row)
+                        ? ((Row) row).getCell(i).getValue()
+                        : ((List<?>) row).get(i);
+                column.addCell(new Cell(cellValue));
             }
             columns.add(column);
         }
     }
 
-    public DataFrame(List<?> rows) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
-        this.columns = new ArrayList<>();
-        this.rows = new ArrayList<>();
-        this.exporter = new DataExporter(this);
-        this.manipulator = new DataManipulator(this);
-
-        if (!rows.isEmpty() && rows.get(0) instanceof Row) {
-            List<String> headers = new ArrayList<>();
-
-            for (int i = 0; i < ((Row) rows.get(0)).size(); i++) {
-                headers.add("Column " + i);
-            }
-
-            initializeColumnsFromData(rows, headers);
-        }
-
-        if (rows.get(0) instanceof List<?>) {
-            List<String> headers = new ArrayList<>();
-
-            for (int i = 0; i < ((List<?>) rows.get(0)).size(); i++) {
-                headers.add("Column " + i);
-            }
-
-            initializeColumnsFromData(rows, headers);
-        }
-
-        initializeRowsWithCells(columns);
-    }
-
-    private void initializeRowsWithCells(List<Column<?>> columns) throws IndexOutOfBounds {
+    /**
+     * Rellena las filas con celdas basadas en las columnas proporcionadas.
+     *
+     * @param columns lista de columnas.
+     * @throws IndexOutOfBounds si los índices exceden el rango permitido.
+     */
+    private void populateRowsWithCells(List<Column<?>> columns) throws IndexOutOfBounds {
         for (int i = 0; i < countRows(); i++) {
             List<Cell<?>> cells = new ArrayList<>();
             for (Column<?> column : columns) {
@@ -141,6 +139,24 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
             }
             rows.add(new Row(i, cells));
         }
+    }
+
+    /**
+     * Genera encabezados de columna predeterminados "Column i" * n.
+     *
+     * @param rows lista de filas.
+     * @return lista de encabezados de columna.
+     */
+    private List<String> generateHeaders(List<?> rows) {
+        int headerCount = (rows.get(0) instanceof Row)
+                ? ((Row) rows.get(0)).size()
+                : ((List<?>) rows.get(0)).size();
+
+        List<String> headers = new ArrayList<>();
+        for (int i = 0; i < headerCount; i++) {
+            headers.add("Column " + i);
+        }
+        return headers;
     }
 
     private enum ExportFormat {
@@ -305,15 +321,45 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
     }
 
     /**
+     * Obtiene una fila del DataFrame por su etiqueta.
+     *
+     * @param label etiqueta de la fila.
+     * @return la fila con la etiqueta especificada.
+     * @throws LabelNotFound si la etiqueta no se encuentra.
+     */
+    public Row getRow(Object label) throws LabelNotFound {
+        return rows.stream()
+                .filter(row -> row.getLabel().equals(label))
+                .findFirst()
+                .orElseThrow(LabelNotFound::new);
+    }
+
+    /**
      * Obtiene una celda del DataFrame por su índice de fila y columna.
      *
      * @param rowIndex    índice de la fila.
      * @param columnIndex índice de la columna.
      * @return la celda en la fila y columna especificadas.
      * @throws IndexOutOfBounds si los índices están fuera de los límites.
+     * @throws LabelNotFound
      */
     public Cell<?> getCell(int rowIndex, int columnIndex) throws IndexOutOfBounds {
-        validateIndices(rowIndex, columnIndex);
+        return columns.get(columnIndex).getCell(rowIndex);
+    }
+
+    /**
+     * Obtiene una celda del DataFrame por su etiqueta de fila y columna.
+     *
+     * @param rowLabel    etiqueta de la fila.
+     * @param columnLabel etiqueta de la columna.
+     * @return la celda en la fila y columna especificadas.
+     * @throws IndexOutOfBounds si los índices están fuera de los límites.
+     * @throws LabelNotFound
+     */
+    public Cell<?> getCell(Object rowLabel, Object columnLabel) throws IndexOutOfBounds, LabelNotFound {
+        int columnIndex = columns.indexOf(this.getColumn(columnLabel));
+        int rowIndex = rows.indexOf(this.getRow(rowLabel));
+
         return columns.get(columnIndex).getCell(rowIndex);
     }
 
@@ -345,11 +391,11 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
      */
     @Override
     public DataFrame copy() throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds {
-        List<Column<?>> copiedColumns = new ArrayList<>();
-        for (int i = 0; i < countColumns(); i++) {
-            copiedColumns.add(columns.get(i).copy());
+        List<Row> rows = new ArrayList<>();
+        for (Row row : this.rows) {
+            rows.add(row.copy());
         }
-        return new DataFrame(copiedColumns);
+        return new DataFrame(rows, this.getColumnLabels());
     }
 
     /**
@@ -598,12 +644,15 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
      * 
      * @param label etiqueta de la columna.
      * @param value valor para reemplazar los valores nulos.
-     * @throws LabelNotFound    si la etiqueta de la columna no se encuentra.
-     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
-     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     * @throws LabelAlreadyInUse
+     * @throws InvalidShape
+     * @throws LabelNotFound     si la etiqueta de la columna no se encuentra.
+     * @throws TypeDoesNotMatch  si los tipos de datos no coinciden.
+     * @throws IndexOutOfBounds  si hay índices fuera del rango permitido.
      */
-    public void fillna(Object label, Object value) throws LabelNotFound, TypeDoesNotMatch, IndexOutOfBounds {
-        manipulator.fillna(label, value);
+    public DataFrame fillna(Object label, Object value)
+            throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, IndexOutOfBounds, LabelNotFound {
+        return manipulator.fillna(label, value);
     }
 
     /**

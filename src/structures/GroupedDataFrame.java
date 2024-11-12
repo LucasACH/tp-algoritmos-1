@@ -104,9 +104,12 @@ public class GroupedDataFrame {
      * @throws LabelNotFound    si la etiqueta no se encuentra en el DataFrame
      * @throws IndexOutOfBounds si el índice está fuera de los límites
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Map<String, Integer> count(Object label) throws LabelNotFound, IndexOutOfBounds {
-        return (Map) aggregate(label, "count");
+        Map<String, Integer> results = new HashMap<>();
+        for (Map.Entry<String, Double> entry : aggregate(label, "count").entrySet()) {
+            results.put(entry.getKey(), entry.getValue().intValue());
+        }
+        return results;
     }
 
     /**
@@ -147,16 +150,18 @@ public class GroupedDataFrame {
             for (Row row : rows) {
                 Cell<?> cell = row.getCell(columnIndex);
                 if (cell != null && cell.getValue() != null) {
-                    double value = ((Number) cell.getValue()).doubleValue();
-                    if ("sum".equals(operation) || "mean".equals(operation)) {
-                        result += value;
-                    } else if ("min".equals(operation))
-                        result = Math.min(result, value);
-                    else if ("max".equals(operation))
-                        result = Math.max(result, value);
-                    else if ("std".equals(operation) || "var".equals(operation)) {
-                        result += value;
-                        values.add(cell);
+                    if (!"count".equals(operation)) {
+                        double value = ((Number) cell.getValue()).doubleValue();
+                        if ("sum".equals(operation) || "mean".equals(operation)) {
+                            result += value;
+                        } else if ("min".equals(operation))
+                            result = Math.min(result, value);
+                        else if ("max".equals(operation))
+                            result = Math.max(result, value);
+                        else if ("std".equals(operation) || "var".equals(operation)) {
+                            result += value;
+                            values.add(cell);
+                        }
                     }
 
                     count++;
