@@ -426,3 +426,5 @@ FodyWeavers.xsd
 
 # CodeRush
 .DS_Store
+
+data/benchmark/

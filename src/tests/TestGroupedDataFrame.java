@@ -16,10 +16,10 @@ public class TestGroupedDataFrame {
     public static void main(String[] args) throws Exception {
         DataFrame df = DataImporter.readCSV("data/dummy.csv");
 
-        GroupedDataFrame gdf = df.groupBy(Arrays.asList("City"));
+        GroupedDataFrame gdf = df.groupBy(Arrays.asList("city"));
 
         // Test sum
-        Map<String, Double> sum = gdf.sum("Age");
+        Map<String, Double> sum = gdf.sum("age");
         assert sum.get("New York") == 85.0;
         assert sum.get("Chicago") == 35.0;
         assert sum.get("Phoenix") == 28.0;
@@ -27,7 +27,7 @@ public class TestGroupedDataFrame {
         assert sum.get("Houston") == 40.0;
 
         // Test mean
-        Map<String, Double> mean = gdf.mean("Salary");
+        Map<String, Double> mean = gdf.mean("salary");
         assert mean.get("New York") == 85000.0;
         assert mean.get("Chicago") == 50000.0;
         assert mean.get("Phoenix") == 75000.0;
@@ -35,7 +35,7 @@ public class TestGroupedDataFrame {
         assert mean.get("Houston") == 90000.0;
 
         // Test min
-        Map<String, Double> min = gdf.min("Age");
+        Map<String, Double> min = gdf.min("age");
         assert min.get("New York") == 25.0;
         assert min.get("Chicago") == 35.0;
         assert min.get("Phoenix") == 28.0;
@@ -43,7 +43,7 @@ public class TestGroupedDataFrame {
         assert min.get("Houston") == 40.0;
 
         // Test max
-        Map<String, Double> max = gdf.max("Salary");
+        Map<String, Double> max = gdf.max("salary");
         assert max.get("New York") == 100000.0;
         assert max.get("Chicago") == 50000.0;
         assert max.get("Phoenix") == 75000.0;
@@ -51,7 +51,7 @@ public class TestGroupedDataFrame {
         assert max.get("Houston") == 90000.0;
 
         // Test count
-        Map<String, Integer> count = gdf.count("Name");
+        Map<String, Integer> count = gdf.count("name");
         assert count.get("New York") == 2;
         assert count.get("Chicago") == 1;
         assert count.get("Phoenix") == 1;
@@ -59,7 +59,7 @@ public class TestGroupedDataFrame {
         assert count.get("Houston") == 1;
 
         // Test std
-        Map<String, Double> std = gdf.std("Salary");
+        Map<String, Double> std = gdf.std("salary");
         assert std.get("New York") == 21213.203435596424;
         assert std.get("Chicago") == 0.0;
         assert std.get("Phoenix") == 0.0;
@@ -67,7 +67,7 @@ public class TestGroupedDataFrame {
         assert std.get("Houston") == 0.0;
 
         // Test var
-        Map<String, Double> var = gdf.var("Salary");
+        Map<String, Double> var = gdf.var("salary");
         assert var.get("New York") == 450000000.0;
         assert var.get("Chicago") == 0.0;
         assert var.get("Phoenix") == 0.0;

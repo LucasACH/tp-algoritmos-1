@@ -1,8 +1,10 @@
-package tests;
+package performance;
 
 /**
- * Clase utilitaria para medir el tiempo de ejecución de bloques de código en milisegundos o segundos.
- * Proporciona métodos para medir código en métodos específicos o bloques enteros.
+ * Clase utilitaria para medir el tiempo de ejecución de bloques de código en
+ * milisegundos o segundos.
+ * Proporciona métodos para medir código en métodos específicos o bloques
+ * enteros.
  */
 public class PerformanceTimer {
 
@@ -26,7 +28,8 @@ public class PerformanceTimer {
     }
 
     /**
-     * Devuelve el tiempo transcurrido en milisegundos entre las últimas llamadas a start y stop.
+     * Devuelve el tiempo transcurrido en milisegundos entre las últimas llamadas a
+     * start y stop.
      *
      * @return Tiempo transcurrido en milisegundos como un valor long.
      */
@@ -35,7 +38,8 @@ public class PerformanceTimer {
     }
 
     /**
-     * Devuelve el tiempo transcurrido en segundos entre las últimas llamadas a start y stop.
+     * Devuelve el tiempo transcurrido en segundos entre las últimas llamadas a
+     * start y stop.
      *
      * @return Tiempo transcurrido en segundos como un valor long.
      */
@@ -44,10 +48,13 @@ public class PerformanceTimer {
     }
 
     /**
-     * Mide el tiempo de ejecución de una operación específica pasada como un Runnable.
-     * Inicia, ejecuta y detiene el temporizador alrededor del Runnable proporcionado.
+     * Mide el tiempo de ejecución de una operación específica pasada como un
+     * Runnable.
+     * Inicia, ejecuta y detiene el temporizador alrededor del Runnable
+     * proporcionado.
      *
-     * @param operation El código a medir, pasado como una expresión lambda o referencia de método.
+     * @param operation El código a medir, pasado como una expresión lambda o
+     *                  referencia de método.
      * @return Tiempo de ejecución en milisegundos como un valor long.
      */
     public static long measure(Runnable operation) {
@@ -57,19 +64,3 @@ public class PerformanceTimer {
         return (endTime - startTime) / 1_000_000;
     }
 }
-
-
-
-/*
- Ejemplo de uso:
-
-    PerformanceTimer timer = new PerformanceTimer();
-    timer.start();
-    // Código a medir
-    timer.stop();
-    System.out.println("Tiempo de ejecución en ms: " + timer.getElapsedTimeMillis());
-
-    long tiempo = PerformanceTimer.measure(() -> myDataFrame.groupBy("columna").sortBy("otraColumna"));
-    System.out.println("Tiempo de ejecución en ms: " + tiempo);
-
- */

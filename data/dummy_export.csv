@@ -1,4 +1,4 @@
-Name,Age,City,Occupation,Salary
+name,age,city,occupation,salary
 Alice,23,New York,Engineer,70000
 Bob,25,San Francisco,Data Scientist,80000
 Charlie,27,Los Angeles,Product Manager,90000

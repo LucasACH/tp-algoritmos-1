@@ -33,7 +33,7 @@ public class TestExportTo {
                 Arrays.asList("David", 29, "Chicago", "Software Engineer", 100000),
                 Arrays.asList("Eve", 31, "Boston", "Data Analyst", 110000));
 
-        List<String> headers = Arrays.asList("Name", "Age", "City", "Occupation", "Salary");
+        List<String> headers = Arrays.asList("name", "age", "city", "occupation", "salary");
 
         df = new DataFrame(rows, headers);
 

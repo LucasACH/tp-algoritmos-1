@@ -2,6 +2,7 @@ package structures;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -9,6 +10,7 @@ import java.util.function.Predicate;
 import exceptions.IndexOutOfBounds;
 import exceptions.InvalidShape;
 import exceptions.LabelAlreadyInUse;
+import exceptions.LabelDoesNotMatch;
 import exceptions.LabelNotFound;
 import exceptions.TypeDoesNotMatch;
 import interfaces.CopyableStructure;
@@ -81,8 +83,13 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
      */
     private void initializeDataFrame(List<?> rows, List<?> headers)
             throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
-        if (rows.isEmpty())
+        if (rows.isEmpty()) {
+            for (int i = 0; i < headers.size(); i++) {
+                columns.add(new Column<>(headers.get(i)));
+            }
+            populateRowsWithCells(columns);
             return;
+        }
 
         validateRowShapes(rows, headers.size());
         initializeColumns(rows, headers);
@@ -175,6 +182,12 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public DataFrame insertRow(List<?> row) throws InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse {
+        if (columns.isEmpty()) {
+            for (int i = 0; i < row.size(); i++) {
+                columns.add(new Column<>("Column " + i));
+            }
+        }
+
         if (row.get(0) instanceof Cell) {
             insertCells(countRows(), (List<Cell<?>>) row);
         } else {
@@ -457,63 +470,57 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
         return sb.toString();
     }
 
-
     /**
      * Muestra el DataFrame en la consola. Si el DataFrame tiene más de 10 filas o
      * más de 6 columnas, se mostrarán solo las primeras y últimas 5 filas y 3
      * columnas en cada extremo.
      * 
-     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     * @throws IndexOutOfBounds  si hay índices fuera del rango permitido.
      * 
-     * @throws InvalidShape si las dimensiones del DataFrame no son válidas.
+     * @throws InvalidShape      si las dimensiones del DataFrame no son válidas.
      * 
-     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
+     * @throws TypeDoesNotMatch  si los tipos de datos no coinciden.
      * 
      * @throws LabelAlreadyInUse si la etiqueta de la fila ya está en uso.
-          * @throws LabelNotFound 
-          */
-         @SuppressWarnings("rawtypes")
-         @Override
-         public void show() throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, LabelNotFound {
+     * @throws LabelNotFound
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Override
+    public void show() throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, LabelNotFound {
         if (this.countRows() <= 10 && this.countColumns() <= 6) {
             System.out.println(this);
-            
         } else if (this.countColumns() > 6) {
-            // Crear un nuevo DataFrame con las primeras 3 y últimas 3 columnas
-            DataFrame smallDf = new DataFrame();
-            
-            // Agregar las primeras 3 columnas
+            ArrayList<Object> headers = new ArrayList<>();
+
             for (int i = 0; i < 3; i++) {
-                smallDf.insertColumn(this.getColumn(i).getLabel(), this.getColumn(i).getCells());
+                headers.add(this.getColumnLabels().get(i));
             }
-            
-            // Agregar columna de puntos suspensivos para indicar omisión
-            smallDf.insertColumn(new Column(smallDf.countRows(), " ... ", " ... "));
-            
-            // Agregar las últimas 3 columnas
+
+            headers.add(" ... ");
+
             for (int i = this.getColumns().size() - 3; i < this.getColumns().size(); i++) {
-                smallDf.insertColumn(this.getColumn(i).getLabel(), this.getColumn(i).getCells());
+                headers.add(this.getColumnLabels().get(i));
             }
-    
-            if (this.countRows() > 10) {
-                // Imprimir las primeras 5 y últimas 5 filas
-                System.out.println(smallDf.head(5));
-                System.out.println("...");
-                System.out.println(smallDf.tail(5));
-            } else {
-                // Imprimir el DataFrame reducido si tiene <=10 filas
-                System.out.println(smallDf);
+
+            DataFrame df = new DataFrame(Arrays.asList(), headers);
+
+            for (int i = 0; i < this.countRows(); i++) {
+                List<Cell<?>> cells = new ArrayList<>();
+                for (int j = 0; j < 3; j++) {
+                    cells.add(this.getCell(i, j));
+                }
+                cells.add(new Cell(" ... "));
+                for (int j = this.countColumns() - 3; j < this.countColumns(); j++) {
+                    cells.add(this.getCell(i, j));
+                }
+                df.insertRow(cells);
             }
-            
+
+            System.out.println(df.head(5));
         } else if (this.countRows() > 10) {
-            // Imprimir todas las columnas pero solo las primeras y últimas 5 filas
             System.out.println(this.head(5));
-            System.out.println("...");
-            System.out.println(this.tail(5));
         }
     }
-    
-    
 
     /**
      * Obtiene las columnas del DataFrame.
@@ -575,16 +582,11 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
     }
 
     private DataFrame createSubDataFrame(int start, int end) throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
-        List<Column<?>> newColumns = new ArrayList<>();
-        for (Column<?> column : this.getColumns()) {
-            try {
-                Column<?> newColumn = new Column<>(column.getLabel(), column.getCells().subList(start, end));
-                newColumns.add(newColumn);
-            } catch (IndexOutOfBoundsException e) {
-                throw new IndexOutOfBounds();
-            }
+        List<Row> newRows = new ArrayList<>();
+        for (int i = start; i < end; i++) {
+            newRows.add(rows.get(i));
         }
-        return new DataFrame(newColumns);
+        return new DataFrame(newRows, getColumnLabels());
     }
 
     private void exportData(String path, ExportFormat format) throws IndexOutOfBounds {
@@ -769,19 +771,18 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
         return manipulator.groupBy(label);
     }
 
-
     /**
      * Concatena dos DataFrames.
      * 
      * @param other DataFrame a concatenar.
      * @return un nuevo DataFrame con las filas concatenadas.
-     * @throws InvalidShape     si las dimensiones de los DataFrames no coinciden.
-     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
-     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     * @throws InvalidShape      si las dimensiones de los DataFrames no coinciden.
+     * @throws TypeDoesNotMatch  si los tipos de datos no coinciden.
+     * @throws IndexOutOfBounds  si hay índices fuera del rango permitido.
+     * @throws LabelDoesNotMatch
      */
-    public DataFrame concat(DataFrame other) throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
+    public DataFrame concat(DataFrame other)
+            throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds, LabelDoesNotMatch {
         return manipulator.concat(other);
     }
 }
-
-
