@@ -1,7 +1,7 @@
 [
-  {"Name": "Alice", "Age": 23, "City": "New York", "Occupation": "Engineer", "Salary": 70000},
-  {"Name": "Bob", "Age": 25, "City": "San Francisco", "Occupation": "Data Scientist", "Salary": 80000},
-  {"Name": "Charlie", "Age": 27, "City": "Los Angeles", "Occupation": "Product Manager", "Salary": 90000},
-  {"Name": "David", "Age": 29, "City": "Chicago", "Occupation": "Software Engineer", "Salary": 100000},
-  {"Name": "Eve", "Age": 31, "City": "Boston", "Occupation": "Data Analyst", "Salary": 110000}
+  {"name": "Alice", "age": 23, "city": "New York", "occupation": "Engineer", "salary": 70000},
+  {"name": "Bob", "age": 25, "city": "San Francisco", "occupation": "Data Scientist", "salary": 80000},
+  {"name": "Charlie", "age": 27, "city": "Los Angeles", "occupation": "Product Manager", "salary": 90000},
+  {"name": "David", "age": 29, "city": "Chicago", "occupation": "Software Engineer", "salary": 100000},
+  {"name": "Eve", "age": 31, "city": "Boston", "occupation": "Data Analyst", "salary": 110000}
 ]

@@ -21,7 +21,7 @@ public class TestDataFrame {
                 Arrays.asList("David", 29, "Chicago", "Software Engineer", 100000),
                 Arrays.asList("Eve", 31, "Boston", "Data Analyst", 110000));
 
-        List<String> headers = Arrays.asList("Name", "Age", "City", "Occupation", "Salary");
+        List<String> headers = Arrays.asList("name", "age", "city", "occupation", "salary");
 
         DataFrame df = new DataFrame(rows, headers);
 
@@ -94,7 +94,7 @@ public class TestDataFrame {
 
         assert df.getColumn(0).equals(Arrays.asList("Alice Smith", "Bob", "Charlie", "David", "Eve", "Frank"));
         assert df.getColumn(1).equals(Arrays.asList(23, 25, 27, 29, 31, 33));
-        assert df.getColumn(2).getLabel().equals("City");
+        assert df.getColumn(2).getLabel().equals("city");
         assert df.getColumn(3).getType().equals("String");
 
         try {

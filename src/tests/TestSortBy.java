@@ -16,8 +16,8 @@ public class TestSortBy {
         DataFrame df = DataImporter.readCSV("data/dummy.csv");
 
         List<Object> columnNames = new ArrayList<>();
-        columnNames.add("Name");
-        columnNames.add("Age");
+        columnNames.add("name");
+        columnNames.add("age");
 
         DataFrame sorted = df.sortBy(columnNames, false);
         assert sorted.getCell(0, 0).equals("Bobby");

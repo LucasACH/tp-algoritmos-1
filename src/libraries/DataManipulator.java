@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 import exceptions.IndexOutOfBounds;
 import exceptions.InvalidShape;
 import exceptions.LabelAlreadyInUse;
+import exceptions.LabelDoesNotMatch;
 import exceptions.LabelNotFound;
 import exceptions.TypeDoesNotMatch;
 import structures.Cell;
@@ -250,15 +251,17 @@ public class DataManipulator {
      * 
      * @param other DataFrame a concatenar.
      * @return un nuevo DataFrame con las filas concatenadas.
-     * @throws InvalidShape     si las dimensiones del nuevo DataFrame no son
-     *                          válidas.
-     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
-     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     * @throws InvalidShape      si las dimensiones del nuevo DataFrame no son
+     *                           válidas.
+     * @throws TypeDoesNotMatch  si los tipos de datos no coinciden.
+     * @throws IndexOutOfBounds  si hay índices fuera del rango permitido.
+     * @throws LabelDoesNotMatch
      */
-    public DataFrame concat(DataFrame other) throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
+    public DataFrame concat(DataFrame other)
+            throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds, LabelDoesNotMatch {
         System.out.println(this.df.getColumnLabels());
         System.out.println(other.getColumnLabels());
-        if (this.df.getColumnLabels().equals(other.getColumnLabels())){
+        if (this.df.getColumnLabels().equals(other.getColumnLabels())) {
             List<List<?>> rows = new ArrayList<>();
             for (Row row : this.df.getRows()) {
                 List<Object> cells = new ArrayList<>();
@@ -276,7 +279,7 @@ public class DataManipulator {
             }
             return new DataFrame(rows, this.df.getColumnLabels());
         } else {
-            throw new InvalidShape("Column labels do not match");
+            throw new LabelDoesNotMatch();
         }
     }
 }
