@@ -40,6 +40,15 @@ public class Column<T> implements CopyableStructure<Column<T>> {
         this.label = label;
     }
 
+    @SuppressWarnings("unchecked")
+    public Column(int numberOfRows, Object label, String cellFiller){
+        this.cells = new ArrayList<>();
+        this.label = label;
+        for (int i = 0; i < numberOfRows; i++) {
+            this.cells.add((Cell<T>) new Cell<>(cellFiller));
+        }
+    }
+
     /**
      * Obtiene la celda en el índice especificado.
      *

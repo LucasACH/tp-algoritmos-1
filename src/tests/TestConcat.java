@@ -10,5 +10,6 @@ public class TestConcat {
 
         DataFrame df = df1.concat(df2);
         System.out.println(df);
+        df.show();
     }
 }

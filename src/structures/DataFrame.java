@@ -457,12 +457,63 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
         return sb.toString();
     }
 
-    @Override
-    public void show() throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch {
-        System.out.println(this.head(5));
-        System.out.println("...");
-        System.out.println(this.tail(5));
+
+    /**
+     * Muestra el DataFrame en la consola. Si el DataFrame tiene más de 10 filas o
+     * más de 6 columnas, se mostrarán solo las primeras y últimas 5 filas y 3
+     * columnas en cada extremo.
+     * 
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     * 
+     * @throws InvalidShape si las dimensiones del DataFrame no son válidas.
+     * 
+     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
+     * 
+     * @throws LabelAlreadyInUse si la etiqueta de la fila ya está en uso.
+          * @throws LabelNotFound 
+          */
+         @SuppressWarnings("rawtypes")
+         @Override
+         public void show() throws IndexOutOfBounds, InvalidShape, TypeDoesNotMatch, LabelAlreadyInUse, LabelNotFound {
+        if (this.countRows() <= 10 && this.countColumns() <= 6) {
+            System.out.println(this);
+            
+        } else if (this.countColumns() > 6) {
+            // Crear un nuevo DataFrame con las primeras 3 y últimas 3 columnas
+            DataFrame smallDf = new DataFrame();
+            
+            // Agregar las primeras 3 columnas
+            for (int i = 0; i < 3; i++) {
+                smallDf.insertColumn(this.getColumn(i).getLabel(), this.getColumn(i).getCells());
+            }
+            
+            // Agregar columna de puntos suspensivos para indicar omisión
+            smallDf.insertColumn(new Column(smallDf.countRows(), " ... ", " ... "));
+            
+            // Agregar las últimas 3 columnas
+            for (int i = this.getColumns().size() - 3; i < this.getColumns().size(); i++) {
+                smallDf.insertColumn(this.getColumn(i).getLabel(), this.getColumn(i).getCells());
+            }
+    
+            if (this.countRows() > 10) {
+                // Imprimir las primeras 5 y últimas 5 filas
+                System.out.println(smallDf.head(5));
+                System.out.println("...");
+                System.out.println(smallDf.tail(5));
+            } else {
+                // Imprimir el DataFrame reducido si tiene <=10 filas
+                System.out.println(smallDf);
+            }
+            
+        } else if (this.countRows() > 10) {
+            // Imprimir todas las columnas pero solo las primeras y últimas 5 filas
+            System.out.println(this.head(5));
+            System.out.println("...");
+            System.out.println(this.tail(5));
+        }
     }
+    
+    
 
     /**
      * Obtiene las columnas del DataFrame.
