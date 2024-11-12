@@ -19,6 +19,10 @@ debe **depender de librerías externas**. En caso de necesitar consumir
 alguna librería externa, se debe consultar previamente si es viable su
 aplicación.
 
+## **Documentación**
+
+La documentación del código se encuentra en el archivo `docs.html`, el cual puede abrir en su navegador para consultarla. Asegúrese de descargar y conservar la carpeta `docs` junto con este archivo para garantizar el acceso completo a la documentación.
+
 ## **Objetivos y Alcance**
 
 - Crear un paquete que permita la **lectura de distintos tipos de archivos** y darle un formato con encabezados y registros. También realizar operaciones con el conjunto de datos.
