@@ -717,4 +717,20 @@ public class DataFrame implements Visualizer<DataFrame>, CopyableStructure<DataF
     public GroupedDataFrame groupBy(List<Object> label) throws LabelNotFound, IndexOutOfBounds {
         return manipulator.groupBy(label);
     }
+
+
+    /**
+     * Concatena dos DataFrames.
+     * 
+     * @param other DataFrame a concatenar.
+     * @return un nuevo DataFrame con las filas concatenadas.
+     * @throws InvalidShape     si las dimensiones de los DataFrames no coinciden.
+     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     */
+    public DataFrame concat(DataFrame other) throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
+        return manipulator.concat(other);
+    }
 }
+
+

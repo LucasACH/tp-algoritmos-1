@@ -244,4 +244,39 @@ public class DataManipulator {
 
         return new GroupedDataFrame(this.df, rows);
     }
+
+    /**
+     * Concatena dos DataFrames.
+     * 
+     * @param other DataFrame a concatenar.
+     * @return un nuevo DataFrame con las filas concatenadas.
+     * @throws InvalidShape     si las dimensiones del nuevo DataFrame no son
+     *                          válidas.
+     * @throws TypeDoesNotMatch si los tipos de datos no coinciden.
+     * @throws IndexOutOfBounds si hay índices fuera del rango permitido.
+     */
+    public DataFrame concat(DataFrame other) throws InvalidShape, TypeDoesNotMatch, IndexOutOfBounds {
+        System.out.println(this.df.getColumnLabels());
+        System.out.println(other.getColumnLabels());
+        if (this.df.getColumnLabels().equals(other.getColumnLabels())){
+            List<List<?>> rows = new ArrayList<>();
+            for (Row row : this.df.getRows()) {
+                List<Object> cells = new ArrayList<>();
+                for (Cell<?> cell : row.getCells()) {
+                    cells.add(cell.getValue());
+                }
+                rows.add(cells);
+            }
+            for (Row row : other.getRows()) {
+                List<Object> cells = new ArrayList<>();
+                for (Cell<?> cell : row.getCells()) {
+                    cells.add(cell.getValue());
+                }
+                rows.add(cells);
+            }
+            return new DataFrame(rows, this.df.getColumnLabels());
+        } else {
+            throw new InvalidShape("Column labels do not match");
+        }
+    }
 }
