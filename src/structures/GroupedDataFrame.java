@@ -173,11 +173,12 @@ public class GroupedDataFrame {
                 result = result / count;
             if ("std".equals(operation) || "var".equals(operation)) {
                 double mean = result / count;
-                double variance = 0;
+                double sum = 0;
                 for (Cell<?> cell : values) {
                     double value = ((Number) cell.getValue()).doubleValue();
-                    variance += Math.pow(value - mean, 2);
+                    sum += Math.pow(value - mean, 2);
                 }
+                double variance = sum / count;
                 result = "std".equals(operation) ? Math.sqrt(variance) : variance;
             }
             results.put(groupKey, result);
